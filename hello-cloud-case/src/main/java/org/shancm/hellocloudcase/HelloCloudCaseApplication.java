@@ -1,4 +1,4 @@
-package org.shancm.microweatherbasic;
+package org.shancm.hellocloudcase;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,9 +9,9 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
  */
 @SpringBootApplication
 @EnableEurekaClient
-public class MicroWeatherBasicApplication {
+public class HelloCloudCaseApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(MicroWeatherBasicApplication.class, args);
+		SpringApplication.run(HelloCloudCaseApplication.class, args);
 	}
 }
