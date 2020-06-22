@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>org.shancm</groupId>
-    <artifactId>robbin-demo</artifactId>
+    <artifactId>ribbon-demo</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>robbin-demo</name>
 
