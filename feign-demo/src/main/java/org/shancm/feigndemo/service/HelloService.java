@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Component
 public interface HelloService {
 
-	@GetMapping("/hello")
-	String hello();
+	@GetMapping("/hello/hello")
+	Integer hello();
+
+	@GetMapping("/hello/timeout")
+	Integer timeout();
 }

@@ -2,14 +2,14 @@ spring:
   application:
     name: hello-service
 
-server:
-  port: 8763
+#server:
+#  port: 8801
 
 eureka:
   client:
     service-url:
-      defaultZone: http://server8761.com:8761/eureka
-#      defaultZone: http://server8761.com:8761/eureka, http://server8762.com:8762/eureka
+#      defaultZone: http://server8761.com:8761/eureka
+      defaultZone: http://server8761.com:8761/eureka, http://server8762.com:8762/eureka
   instance:
     prefer-ip-address: true
 

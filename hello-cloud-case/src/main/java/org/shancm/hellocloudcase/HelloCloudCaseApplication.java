@@ -9,13 +9,13 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  * @author shancm
+ * @date 2019/1/18
  */
 @SpringBootApplication
 @EnableEurekaClient
 public class HelloCloudCaseApplication {
 
 	@Bean
-	@LoadBalanced
 	RestTemplate restTemplate(){
 		return new RestTemplate();
 	}

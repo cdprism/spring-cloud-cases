@@ -1,5 +1,6 @@
 package org.shancm.feigndemo.controller;
 
+import org.shancm.common.entity.CommonResponse;
 import org.shancm.feigndemo.service.HelloService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,7 +25,12 @@ public class FeignController {
 	}
 
 	@GetMapping("/hi")
-	public String hi(){
-		return helloService.hello();
+	public CommonResponse<Integer> hi(){
+		return CommonResponse.success(helloService.hello());
+	}
+
+	@GetMapping("/timeout")
+	public CommonResponse<Integer> timeout(){
+		return CommonResponse.success(helloService.timeout());
 	}
 }

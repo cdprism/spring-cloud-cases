@@ -11,6 +11,7 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  * @author shancm
+ * @date 2019/1/17
  */
 @SpringCloudApplication
 @EnableEurekaClient

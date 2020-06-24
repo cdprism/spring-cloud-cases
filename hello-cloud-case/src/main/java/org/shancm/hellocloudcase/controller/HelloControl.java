@@ -1,10 +1,7 @@
 package org.shancm.hellocloudcase.controller;
 
-import com.netflix.discovery.DiscoveryClient;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import org.shancm.hellocloudcase.service.ServerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.netflix.eureka.CloudEurekaClient;
-import org.springframework.cloud.netflix.eureka.EurekaDiscoveryClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,25 +18,25 @@ import java.util.Random;
 @RequestMapping("/hello")
 public class HelloControl {
 
-//	private EurekaDiscoveryClient client;
+    private ServerConfig serverConfig;
 
-//	@Autowired
-//	public HelloControl(EurekaDiscoveryClient client){
-//		this.client = client;
-//	}
+    @Autowired
+    public HelloControl(ServerConfig serverConfig) {
+        this.serverConfig = serverConfig;
+    }
 
+    @GetMapping("/hello")
+    public Integer hello() {
+        return serverConfig.getPort();
+    }
 
-	@GetMapping("/hello")
-	@HystrixCommand(fallbackMethod="error")
-	public String hello() throws InterruptedException {
-//		long l = new Random().nextInt(5000);
-//		System.out.println(l);
-//		Thread.sleep(l);
-		System.out.println("hello cloud case");
-		return "hello cloud";
-	}
-
-	public String error(){
-		return "error";
-	}
+    @GetMapping("/timeout")
+    public Integer timeout(){
+        try {
+            Thread.sleep(1500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return serverConfig.getPort();
+    }
 }
