@@ -16,11 +16,12 @@
     <description>Demo project for Spring Boot</description>
 
     <modules>
-        <module>hello-cloud-case</module>
+        <module>hello-case</module>
         <module>eureka-case</module>
-        <module>ribbon-demo</module>
-        <module>feign-demo</module>
+        <module>ribbon-case</module>
+        <module>feign-case</module>
         <module>hystrix-case</module>
+        <module>nacos-provider-case</module>
     </modules>
 
     <properties>
