@@ -2,8 +2,8 @@ spring:
   application:
     name: hello-service
 
-#server:
-#  port: 8801
+server:
+  port: 8801
 
 eureka:
   client:
