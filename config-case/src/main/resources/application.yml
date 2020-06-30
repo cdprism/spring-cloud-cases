@@ -1,0 +1,22 @@
+server:
+  port: 3000
+
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/cdprism/spring-cloud-config.git
+          search-paths: spring-cloud-config
+      label: master
+      profile: dev
+
+eureka:
+  instance:
+    hostname: config-server3000
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka

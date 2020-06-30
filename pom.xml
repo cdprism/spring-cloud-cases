@@ -22,6 +22,7 @@
         <module>feign-case</module>
         <module>hystrix-case</module>
         <module>gateway-case</module>
+        <module>config-case</module>
         <module>nacos-provider-case</module>
         <module>nacos-consumer-case</module>
     </modules>
