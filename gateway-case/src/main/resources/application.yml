@@ -6,9 +6,13 @@ spring:
     name: gateway-case
   cloud:
     gateway:
+      discovery:
+        locator:
+          enabled: true
       routes:
         - id: hello-gateway
-          uri: http://localhost:8801
+#          uri: http://localhost:8801
+          uri: lb://HELLO-SERVICE
           predicates:
             - Path=/hello/**
 eureka:
