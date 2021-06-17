@@ -13,8 +13,10 @@ import org.springframework.context.annotation.Configuration;
 public class GatewayConfig {
 
     @Bean
-    public RouteLocator routeLocator(RouteLocatorBuilder builder){
-        return builder.routes().route("route_baidu_game",
-                n -> n.path("/game").uri("http://news.baidu.com")).build();
+    public RouteLocator routeLocator(RouteLocatorBuilder builder) {
+        return builder.routes()
+                .route("route_baidu_game",
+                        n -> n.path("/game").uri("http://news.baidu.com"))
+                .build();
     }
 }
