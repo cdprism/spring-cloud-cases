@@ -25,12 +25,12 @@ public class ConfigController {
         this.serverConfig = serverConfig;
     }
 
-    @Value("${from}")
-    private String fromKey;
+//    @Value("${from}")
+//    private String fromKey;
 
     @GetMapping(value = "/echo/{string}")
     public String echo(@PathVariable String string) {
-        System.out.println(fromKey);
+//        System.out.println(fromKey);
         return "Hello Nacos Discovery " + string + " & port is " + serverConfig.getPort();
     }
 }
