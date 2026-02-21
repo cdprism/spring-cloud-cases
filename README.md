@@ -11,7 +11,15 @@
 `Seata 2.2.0`  
 `RocketMQ 5.1.4`  
 
-## nacos 3.1.1 配置  
+## druid 配置
+- /druid 可访问druid后台  
+
+- 开启/关闭 Druid 的监控后台页面 在dev和prod设置
+```text
+druid.stat-view.enabled=true
+```
+
+## nacos 配置  
 
 1. 安装MySQL 并执行conf下mysql-schema.sql脚本
 2. 修改conf下的application.properties文件，配置数据库连接
