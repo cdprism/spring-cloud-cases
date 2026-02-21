@@ -19,7 +19,7 @@
 
     <dependencies>
         <!-- 数据源代码生成 -->
-        <dependency>
+        <!--<dependency>
             <groupId>com.mybatis-flex</groupId>
             <artifactId>mybatis-flex-codegen</artifactId>
             <version>1.11.6</version>
@@ -28,7 +28,7 @@
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
             <version>4.0.3</version>
-        </dependency>
+        </dependency>-->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
