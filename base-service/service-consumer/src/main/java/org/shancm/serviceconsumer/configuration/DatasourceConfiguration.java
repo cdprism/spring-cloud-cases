@@ -24,11 +24,11 @@ import java.util.StringJoiner;
 @Configuration
 public class DatasourceConfiguration {
 
-    @Value("${datasource.url}")
+    @Value("${spring.datasource.url}")
     private String datasourceUrl;
-    @Value("${datasource.username}")
+    @Value("${spring.datasource.username}")
     private String datasourceUsername = "postgres";
-    @Value("${datasource.password}")
+    @Value("${spring.datasource.password}")
     private String datasourcePassword = "mysql";
     private final static String DRIVE_CLASS_NAME = "org.postgresql.Driver";
     private final static String VALIDATION_QUERY = "SELECT 1";
