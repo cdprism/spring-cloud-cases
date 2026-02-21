@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--Configuration后面的status，这个用于设置log4j2自身内部的信息输出，可以不设置，当设置成trace时，你会看到log4j2内部各种详细输出-->
+<!-- status="WARN" 表示打印 log4j2 框架自身的日志级别，monitorInterval="30" 表示每 30 秒检查配置文件变化并热加载 -->
+<Configuration status="WARN" monitorInterval="30">
+    <!--日志级别以及优先级排序: OFF > FATAL > ERROR > WARN > INFO > DEBUG > TRACE > ALL -->
+
+    <!-- 1. 定义属性：从 Spring Environment 中读取值，若不存在则使用默认值 -->
+    <Properties>
+        <!-- 从 application.yml 读取应用名称，用于文件名 -->
+        <property name="APP_NAME">${spring:spring.application.name:-app}</property>
+        <!-- 从 application.yml 读取日志路径，默认 ./logs -->
+        <property name="LOG_PATH">${spring:logging.file.path:-./logs}</property>
+        <!-- 控制台日志格式（带颜色） -->
+        <property name="CONSOLE_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight{%5p}{FATAL=red, ERROR=red, WARN=yellow, INFO=green, DEBUG=blue, TRACE=blue} [%15.15t] %style{%-40.40c{1.}}{cyan} : %m%n%xwEx</property>
+        <!-- 文件日志格式（标准格式，用于归档） -->
+        <property name="FILE_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%t] %c{1.} : %m%n%xwEx</property>
+        <!-- JSON 日志格式（用于生产环境对接日志中心） -->
+        <property name="JSON_PATTERN">{"timestamp":"%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ}","level":"%p","thread":"%t","logger":"%c","message":"%m","context":"%X"}%n</property>
+    </Properties>
+
+    <!-- 2. 定义 Appenders（输出目标） -->
+    <Appenders>
+        <!-- 控制台 Appender：所有环境通用，但可通过 ThresholdFilter 在不同环境设置不同级别 -->
+        <Console name="CONSOLE" target="SYSTEM_OUT">
+            <PatternLayout pattern="${CONSOLE_PATTERN}"/>
+        </Console>
+
+        <!-- 滚动文件 Appender（普通格式）：用于开发/测试环境归档 -->
+        <RollingFile name="ROLLING_FILE" fileName="${LOG_PATH}/${APP_NAME}.log"
+                     filePattern="${LOG_PATH}/history/${APP_NAME}-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout pattern="${FILE_PATTERN}"/>
+            <Policies>
+                <!-- 每天滚动一次 -->
+                <TimeBasedTriggeringPolicy />
+                <!-- 或当文件大小达到 100MB 时滚动 -->
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <!-- 保留 30 天内的日志，总大小不超过 10GB -->
+            <DefaultRolloverStrategy max="30">
+                <Delete basePath="${LOG_PATH}/history" maxDepth="2">
+                    <IfFileName glob="*.log.gz" />
+                    <IfLastModified age="30d" />
+                    <IfAny>
+                        <IfAccumulatedFileSize exceeds="10 GB" />
+                        <IfAccumulatedFileCount exceeds="100" />
+                    </IfAny>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <!-- 滚动文件 Appender（JSON 格式）：专门用于生产环境 -->
+        <RollingFile name="JSON_FILE" fileName="${LOG_PATH}/${APP_NAME}.json"
+                     filePattern="${LOG_PATH}/history/${APP_NAME}-%d{yyyy-MM-dd}-%i.json.gz">
+            <PatternLayout pattern="${JSON_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy />
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30">
+                <Delete basePath="${LOG_PATH}/history" maxDepth="2">
+                    <IfFileName glob="*.json.gz" />
+                    <IfLastModified age="30d" />
+                    <IfAccumulatedFileSize exceeds="10 GB" />
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <!-- 异步 Appender（包装 JSON_FILE，用于生产环境） -->
+        <Async name="ASYNC_JSON" bufferSize="8192" includeLocation="true">
+            <AppenderRef ref="JSON_FILE"/>
+        </Async>
+    </Appenders>
+
+    <!-- 3. 定义 Loggers（日志记录器） -->
+    <Loggers>
+        <!-- 屏蔽一些不必要的框架日志 -->
+        <Logger name="org.springframework" level="WARN"/>
+        <Logger name="org.hibernate" level="WARN"/>
+        <Logger name="com.zaxxer.hikari" level="WARN"/>
+
+        <!-- ===== 多环境配置区：通过 springProfile 标签区分 ===== -->
+        <!-- 开发环境：控制台输出 DEBUG，文件输出 INFO（同步） -->
+        <SpringProfile name="dev">
+            <Root level="INFO">
+                <AppenderRef ref="CONSOLE" level="DEBUG"/>
+                <AppenderRef ref="ROLLING_FILE"/>
+            </Root>
+            <!-- 针对业务包单独调低级别 -->
+            <Logger name="com.yourcompany" level="DEBUG" additivity="false">
+                <AppenderRef ref="CONSOLE"/>
+                <AppenderRef ref="ROLLING_FILE"/>
+            </Logger>
+        </SpringProfile>
+
+        <!-- 生产环境：只输出 INFO 及以上，使用 JSON 格式 + 异步 Appender -->
+        <SpringProfile name="prod">
+            <Root level="WARN">
+                <AppenderRef ref="CONSOLE" level="WARN"/>  <!-- 控制台仅输出 WARN+，避免污染 stdout 日志 -->
+            </Root>
+            <Logger name="com.yourcompany" level="INFO" additivity="false">
+                <!-- 关键业务日志使用异步 JSON 写入文件 -->
+                <AppenderRef ref="ASYNC_JSON"/>
+            </Logger>
+            <!-- 可单独为监控健康检查等设置更高级别 -->
+            <Logger name="org.springframework.boot.actuate" level="INFO"/>
+        </SpringProfile>
+
+        <!-- 默认配置（未匹配到上述 profile 时） -->
+        <SpringProfile name="!dev &amp; !prod">
+            <Root level="INFO">
+                <AppenderRef ref="CONSOLE"/>
+                <AppenderRef ref="ROLLING_FILE"/>
+            </Root>
+        </SpringProfile>
+    </Loggers>
+</Configuration>
