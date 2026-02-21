@@ -48,3 +48,16 @@ FLUSH PRIVILEGES;
 ```
 3. @EnableDiscoveryClient
 4. spring.cloud.nacos.server-addr=${nacos.server-addr} ***nacos.server-addr*** 在不同环境定义
+
+## nacos config  
+
+1. 配置文件增加 spring.config.import=nacos:XXX.properties
+2. 添加property类 添加注解
+```text
+@Data
+@Component
+@ConfigurationProperties(prefix = "provider")
+```
+3. 命名空间属性 spring.cloud.nacos.config.namespace=${spring.profiles.active:public}
+4. 配置分组属性 spring.config.import=nacos:provider.properties?**group**=service-provider
+
