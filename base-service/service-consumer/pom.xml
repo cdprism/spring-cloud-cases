@@ -9,6 +9,8 @@
     </parent>
     <artifactId>service-consumer</artifactId>
 
+    <packaging>pom</packaging>
+
     <name>service-consumer</name>
     <description>service-consumer</description>
 
