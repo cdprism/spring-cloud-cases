@@ -8,9 +8,9 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <artifactId>service-consumer</artifactId>
+
     <name>service-consumer</name>
     <description>service-consumer</description>
 
-    <packaging>pom</packaging>
-
 </project>
+

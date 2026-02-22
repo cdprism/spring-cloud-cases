@@ -61,3 +61,7 @@ FLUSH PRIVILEGES;
 3. 命名空间属性 spring.cloud.nacos.config.namespace=${spring.profiles.active:public}
 4. 配置分组属性 spring.config.import=nacos:provider.properties?**group**=service-provider
 
+## openfeign
+1. 在调用方使用注解 @EnableFeignClients
+2. 在提供方定义接口 @FeignClient(name = "service-provider")
+3. 在调用方调用接口

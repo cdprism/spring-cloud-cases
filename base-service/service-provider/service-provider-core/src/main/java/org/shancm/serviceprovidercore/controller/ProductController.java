@@ -4,6 +4,9 @@ import com.mybatisflex.core.paginate.Page;
 import org.shancm.serviceprovidercore.config.property.ProviderProperty;
 import org.shancm.serviceprovidercore.entity.Product;
 import org.shancm.serviceprovidercore.service.ProductService;
+import org.shancm.serviceproviderinterface.domain.req.ProductReq;
+import org.shancm.serviceproviderinterface.domain.res.ProductRes;
+import org.shancm.serviceproviderinterface.feign.ServiceProductFeignClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +20,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/product")
-public class ProductController {
+public class ProductController implements ServiceProductFeignClient {
 
     private final ProductService productService;
     private final ProviderProperty providerProperty;
@@ -28,12 +31,13 @@ public class ProductController {
         this.providerProperty = providerProperty;
     }
 
-
+    @Override
     @GetMapping("/config")
-    String checkConfig() {
+    public String checkConfig() {
         System.out.println(providerProperty.getDateTime());
         return "DateTime is " + providerProperty.getDateTime();
     }
+
 
     /**
      * 保存商品表。
@@ -41,8 +45,9 @@ public class ProductController {
      * @param product 商品表
      * @return {@code true} 保存成功，{@code false} 保存失败
      */
+    @Override
     @PostMapping("save")
-    public boolean save(@RequestBody Product product) {
+    public boolean save(@RequestBody ProductReq product) {
         return productService.save(product);
     }
 
@@ -52,10 +57,12 @@ public class ProductController {
      * @param id 主键
      * @return {@code true} 删除成功，{@code false} 删除失败
      */
+    @Override
     @DeleteMapping("remove/{id}")
     public boolean remove(@PathVariable Long id) {
         return productService.removeById(id);
     }
+
 
     /**
      * 根据主键更新商品表。
@@ -63,8 +70,9 @@ public class ProductController {
      * @param product 商品表
      * @return {@code true} 更新成功，{@code false} 更新失败
      */
+    @Override
     @PutMapping("update")
-    public boolean update(@RequestBody Product product) {
+    public boolean update(@RequestBody ProductReq product) {
         return productService.updateById(product);
     }
 
@@ -73,8 +81,9 @@ public class ProductController {
      *
      * @return 所有数据
      */
+    @Override
     @GetMapping("list")
-    public List<Product> list() {
+    public List<ProductRes> list() {
         return productService.list();
     }
 
@@ -84,8 +93,9 @@ public class ProductController {
      * @param id 商品表主键
      * @return 商品表详情
      */
+    @Override
     @GetMapping("getInfo/{id}")
-    public Product getInfo(@PathVariable Long id) {
+    public ProductRes getInfo(@PathVariable Long id) {
         return productService.getById(id);
     }
 
@@ -95,8 +105,9 @@ public class ProductController {
      * @param page 分页对象
      * @return 分页对象
      */
+    @Override
     @GetMapping("page")
-    public Page<Product> page(Page<Product> page) {
+    public Page<ProductRes> page(Page<ProductReq> page) {
         return productService.page(page);
     }
 
