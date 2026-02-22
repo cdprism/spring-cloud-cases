@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+    <!-- 1. 定义常量（全局参数） -->
+    <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="unknown-service"/>
+    <springProperty name="LOG_PATH" source="logging.file.path" defaultValue="./logs"/>
+    <property name="LOG_CHARSET" value="UTF-8"/>
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [${APP_NAME}] [%X{traceId:-}] %logger{50} - %msg%n"/>
+    <!-- 说明：%X{traceId:-} 适配Spring Cloud链路追踪（如Sleuth/SkyWalking），无traceId时显示空 -->
+
+    <!-- 2. 控制台输出Appender -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- 编码器：控制日志输出格式 -->
+        <encoder>
+            <charset>${LOG_CHARSET}</charset>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+        <!-- 过滤器：只输出INFO及以上级别日志到控制台（可根据需求调整） -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+    </appender>
+
+    <!-- 3. 通用日志文件Appender（滚动策略） -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 文件路径 -->
+        <file>${LOG_PATH}/${APP_NAME}.log</file>
+        <!-- 滚动策略：按时间+大小切割 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 文件名模式保持不变，%d 和 %i 可以共存 -->
+            <fileNamePattern>${LOG_PATH}/${APP_NAME}.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <!-- 单个日志文件的最大大小 -->
+            <maxFileSize>100MB</maxFileSize>
+            <!-- 最大保留天数 -->
+            <maxHistory>30</maxHistory>
+            <!-- 所有日志文件的总大小上限 -->
+            <totalSizeCap>10GB</totalSizeCap>
+        </rollingPolicy>
+        <!-- 编码器 用到了 MDC（%X{traceId}）以便链路追踪 -->
+        <encoder>
+            <charset>${LOG_CHARSET}</charset>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+        <!-- 过滤器：输出DEBUG及以上级别 -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
+    </appender>
+
+    <!-- 4. 错误日志单独输出Appender（便于快速定位异常） -->
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/error.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxHistory>90</maxHistory> <!-- 错误日志保留更久 -->
+            <totalSizeCap>5GB</totalSizeCap>
+            <maxFileSize>100MB</maxFileSize><!-- 错误日志单个文件更小 -->
+        </rollingPolicy>
+        <encoder>
+            <charset>${LOG_CHARSET}</charset>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+        <!-- 过滤器：只输出ERROR级别 -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!-- 5. 多环境适配（Spring Cloud常用：dev/test/prod） -->
+    <springProfile name="dev">
+        <!-- 开发环境：控制台输出所有日志，文件输出DEBUG+ -->
+        <root level="DEBUG">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+            <appender-ref ref="ERROR_FILE"/>
+        </root>
+        <!-- 第三方框架日志级别调整（减少开发环境冗余日志） -->
+        <logger name="org.springframework" level="WARN"/>
+        <logger name="com.alibaba.nacos" level="WARN"/>
+        <logger name="feign" level="INFO"/>
+    </springProfile>
+
+    <springProfile name="test,prod">
+        <!-- 测试/生产环境：控制台只输出INFO+，文件输出DEBUG+，错误日志单独存储 -->
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="FILE"/>
+            <appender-ref ref="ERROR_FILE"/>
+        </root>
+        <!-- 生产环境第三方框架日志级别（进一步降低冗余） -->
+        <logger name="org.springframework" level="ERROR"/>
+        <logger name="com.alibaba.nacos" level="ERROR"/>
+        <logger name="feign" level="WARN"/>
+        <!-- 自定义业务包日志级别（按需调整） -->
+        <logger name="com.yourcompany" level="DEBUG" additivity="false">
+            <appender-ref ref="FILE"/>
+            <appender-ref ref="ERROR_FILE"/>
+        </logger>
+    </springProfile>
+
+    <!-- 6. 特殊日志处理：如数据库操作日志（可选） -->
+    <!--<logger name="com.yourcompany.mapper" level="DEBUG" additivity="false">
+        <appender-ref ref="FILE"/>
+    </logger>-->
+
+
+    <!-- 可选：当需要将结构化 JSON 推送到 ELK/Logstash 时（需额外依赖 net.logstash.logback） -->
+    <!--
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+      <destination>logstash-host:5000</destination>
+      <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
+    </appender>
+    -->
+
+</configuration>

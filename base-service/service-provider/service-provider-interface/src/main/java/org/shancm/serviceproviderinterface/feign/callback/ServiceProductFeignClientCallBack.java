@@ -19,12 +19,12 @@ import java.util.List;
 public class ServiceProductFeignClientCallBack implements ServiceProductFeignClient {
     @Override
     public String postTest(ProductReq productReq) {
-        return "";
+        return "empty";
     }
 
     @Override
     public String checkConfig() {
-        return "";
+        return "empty";
     }
 
     @Override

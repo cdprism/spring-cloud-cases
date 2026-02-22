@@ -12,4 +12,9 @@
 
     <packaging>pom</packaging>
 
+    <modules>
+        <module>service-provider-core</module>
+        <module>service-provider-interface</module>
+    </modules>
+
 </project>

@@ -17,7 +17,7 @@
 - /druid 可访问druid后台  
 
 - 开启/关闭 Druid 的监控后台页面 在dev和prod设置
-```text
+```properties
 druid.stat-view.enabled=true
 ```
 
@@ -25,7 +25,7 @@ druid.stat-view.enabled=true
 
 1. 安装MySQL 并执行conf下mysql-schema.sql脚本
 2. 修改conf下的application.properties文件，配置数据库连接
-```text
+```properties
 allowPublicKeyRetrieval=true - 允许客户端从服务器获取公钥
 spring.sql.init.platform=mysql
 db.num=1
@@ -34,7 +34,7 @@ db.user=root
 db.password=mysql
 ```
 生产环境建议配置如下
-```text
+```sql
 -- 登录MySQL
 mysql -u root -p
 
@@ -72,7 +72,7 @@ FLUSH PRIVILEGES;
 2. `FeignConfiguration` 类配置
 - ### feign 超时控制 
   `connectTimeout` 连接超时 默认10s `readTimeout` 读取超时 默认60s
-```text
+```yaml
 spring:
   cloud:
     openfeign:
@@ -128,8 +128,32 @@ spring:
 - 系统规则：load1、cpu使用率、平均RT、并发线程数
 
 ## gateway 网关
-1. 统一入口
-2. 请求路由
+`统一入口` `请求路由` `权限校验` `流量监控` `熔断降级` `限流` `日志` `过滤器`
+1. 路由规则
+```yaml
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: bing-route
+          uri: https://cn.bing.com
+          predicates:
+            - Path=/**
+          order: 10
+          # id 全局唯一
+        - id: order-route
+          # 指定服务名称
+          uri: lb://service-order
+          # 指定断言规则，即路由匹配规则
+          predicates:
+            - Path=/api/order/**
+          order: 1
+        - id: product-route
+          uri: lb://service-product
+          predicates:
+            - Path=/api/product/**
+          order: 2
+```
 
 
 

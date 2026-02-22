@@ -17,6 +17,7 @@
     <modules>
         <module>base-service</module>
         <module>common</module>
+        <module>gateway</module>
     </modules>
 
     <properties>
