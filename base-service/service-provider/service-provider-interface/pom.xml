@@ -6,14 +6,17 @@
     <parent>
         <groupId>org.shancm</groupId>
         <artifactId>service-provider</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>0.0.1</version>
     </parent>
-
     <artifactId>service-provider-interface</artifactId>
     <packaging>jar</packaging>
 
 
     <dependencies>
-
+        <dependency>
+            <groupId>org.shancm</groupId>
+            <artifactId>common</artifactId>
+            <version>0.0.1</version>
+        </dependency>
     </dependencies>
 </project>

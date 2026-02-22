@@ -11,6 +11,8 @@
 `Seata 2.2.0`  
 `RocketMQ 5.1.4`  
 
+- 所有自建工程版本都别包含SNAPSHOT  
+
 ## druid 配置
 - /druid 可访问druid后台  
 

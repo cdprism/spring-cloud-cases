@@ -1,13 +1,15 @@
 package org.shancm.serviceprovidercore.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.mybatisflex.core.paginate.Page;
+import org.shancm.common.domain.Result;
+import org.shancm.common.util.JsonUtils;
 import org.shancm.serviceprovidercore.config.property.ProviderProperty;
 import org.shancm.serviceprovidercore.entity.Product;
 import org.shancm.serviceprovidercore.service.ProductService;
 import org.shancm.serviceproviderinterface.domain.req.ProductReq;
 import org.shancm.serviceproviderinterface.domain.res.ProductRes;
 import org.shancm.serviceproviderinterface.feign.ServiceProductFeignClient;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,44 +40,6 @@ public class ProductController implements ServiceProductFeignClient {
         return "DateTime is " + providerProperty.getDateTime();
     }
 
-
-    /**
-     * 保存商品表。
-     *
-     * @param product 商品表
-     * @return {@code true} 保存成功，{@code false} 保存失败
-     */
-    @Override
-    @PostMapping("save")
-    public boolean save(@RequestBody ProductReq product) {
-        return productService.save(product);
-    }
-
-    /**
-     * 根据主键删除商品表。
-     *
-     * @param id 主键
-     * @return {@code true} 删除成功，{@code false} 删除失败
-     */
-    @Override
-    @DeleteMapping("remove/{id}")
-    public boolean remove(@PathVariable Long id) {
-        return productService.removeById(id);
-    }
-
-
-    /**
-     * 根据主键更新商品表。
-     *
-     * @param product 商品表
-     * @return {@code true} 更新成功，{@code false} 更新失败
-     */
-    @Override
-    @PutMapping("update")
-    public boolean update(@RequestBody ProductReq product) {
-        return productService.updateById(product);
-    }
-
     /**
      * 查询所有商品表。
      *
@@ -83,8 +47,15 @@ public class ProductController implements ServiceProductFeignClient {
      */
     @Override
     @GetMapping("list")
-    public List<ProductRes> list() {
-        return productService.list();
+    public Result<List<ProductRes>> list() {
+
+        List<ProductRes> resList = JsonUtils.convertValue(
+                productService.list(),
+                new TypeReference<>() {
+                }
+        );
+
+        return Result.success(resList);
     }
 
     /**
@@ -95,20 +66,30 @@ public class ProductController implements ServiceProductFeignClient {
      */
     @Override
     @GetMapping("getInfo/{id}")
-    public ProductRes getInfo(@PathVariable Long id) {
-        return productService.getById(id);
+    public Result<ProductRes> getInfo(@PathVariable Long id) {
+
+        return Result.success(JsonUtils.convertValue(productService.getById(id), ProductRes.class));
     }
 
     /**
      * 分页查询商品表。
      *
-     * @param page 分页对象
+     * @param req 分页对象
      * @return 分页对象
      */
     @Override
     @GetMapping("page")
-    public Page<ProductRes> page(Page<ProductReq> page) {
-        return productService.page(page);
+    public Result<Page<ProductRes>> page(Page<ProductReq> req) {
+        Page<Product> page = JsonUtils.convertValue(req, new TypeReference<>() {
+        });
+
+        Page<Product> pages = productService.page(page);
+
+        Page<ProductRes> productResPage = JsonUtils.convertValue(pages, new TypeReference<>() {
+        });
+
+        return Result.success(productResPage);
+
     }
 
 }

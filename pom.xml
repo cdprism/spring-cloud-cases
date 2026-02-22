@@ -10,7 +10,7 @@
     </parent>
     <groupId>org.shancm</groupId>
     <artifactId>spring-cloud-cases</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
 
     <packaging>pom</packaging>
 
@@ -19,6 +19,7 @@
 
     <modules>
         <module>base-service</module>
+        <module>common</module>
     </modules>
 
     <properties>
@@ -53,15 +54,4 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
-
 </project>
