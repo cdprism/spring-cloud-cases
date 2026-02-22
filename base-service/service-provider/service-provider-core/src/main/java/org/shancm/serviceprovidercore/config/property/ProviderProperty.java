@@ -6,10 +6,9 @@ import org.springframework.stereotype.Component;
 
 /**
  * @author by shancm
- * @description TODO
+ * @description ProviderProperty
  * @since 2026-02-21 17:19
  */
-
 @Data
 @Component
 @ConfigurationProperties(prefix = "provider")

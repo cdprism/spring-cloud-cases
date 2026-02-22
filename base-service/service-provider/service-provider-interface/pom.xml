@@ -8,9 +8,10 @@
         <artifactId>service-provider</artifactId>
         <version>0.0.1</version>
     </parent>
-    <artifactId>service-provider-interface</artifactId>
-    <packaging>jar</packaging>
 
+    <artifactId>service-provider-interface</artifactId>
+
+    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>

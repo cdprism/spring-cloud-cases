@@ -7,10 +7,8 @@
         <artifactId>base-service</artifactId>
         <version>0.0.1</version>
     </parent>
+
     <artifactId>service-provider</artifactId>
-    <!--<version>0.0.1-SNAPSHOT</version>-->
-    <name>service-provider</name>
-    <description>service-provider</description>
 
     <packaging>pom</packaging>
 

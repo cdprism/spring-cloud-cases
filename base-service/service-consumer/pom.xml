@@ -7,12 +7,10 @@
         <artifactId>base-service</artifactId>
         <version>0.0.1</version>
     </parent>
+
     <artifactId>service-consumer</artifactId>
 
     <packaging>pom</packaging>
-
-    <name>service-consumer</name>
-    <description>service-consumer</description>
 
 </project>
 

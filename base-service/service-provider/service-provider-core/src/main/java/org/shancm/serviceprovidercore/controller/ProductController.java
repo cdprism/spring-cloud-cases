@@ -3,6 +3,8 @@ package org.shancm.serviceprovidercore.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.mybatisflex.core.paginate.Page;
 import org.shancm.common.domain.Result;
+import org.shancm.common.domain.enums.ResultCode;
+import org.shancm.common.exception.BusinessException;
 import org.shancm.common.util.JsonUtils;
 import org.shancm.serviceprovidercore.config.property.ProviderProperty;
 import org.shancm.serviceprovidercore.entity.Product;
@@ -39,6 +41,18 @@ public class ProductController implements ServiceProductFeignClient {
         System.out.println(providerProperty.getDateTime());
         return "DateTime is " + providerProperty.getDateTime();
     }
+
+    @GetMapping("/e1")
+    public void e1() throws BusinessException {
+        throw new BusinessException(ResultCode.SYSTEM_ERROR);
+    }
+
+    @GetMapping("/e2")
+    public void e2() throws Exception {
+        List<Integer> list = null;
+        list.getFirst();
+    }
+
 
     /**
      * 查询所有商品表。
@@ -89,7 +103,6 @@ public class ProductController implements ServiceProductFeignClient {
         });
 
         return Result.success(productResPage);
-
     }
 
 }

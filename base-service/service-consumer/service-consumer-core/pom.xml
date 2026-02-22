@@ -10,11 +10,6 @@
 
     <artifactId>service-consumer-core</artifactId>
 
-    <name>service-consumer-core</name>
-    <description>service-consumer-core</description>
-
-    <properties>
-    </properties>
     <dependencies>
         <!-- 数据源代码生成 -->
         <!--<dependency>

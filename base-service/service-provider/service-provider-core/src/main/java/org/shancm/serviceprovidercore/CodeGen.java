@@ -6,7 +6,6 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import java.util.HashSet;*/
 
-
 public class CodeGen {
 
     /*public static void main(String[] args) {

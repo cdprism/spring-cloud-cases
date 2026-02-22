@@ -20,33 +20,6 @@ public interface ServiceProductFeignClient {
     String checkConfig();
 
     /**
-     * 保存商品表。
-     *
-     * @param product 商品表
-     * @return {@code true} 保存成功，{@code false} 保存失败
-     */
-    /*@PostMapping("save")
-    boolean save(@RequestBody ProductReq product);*/
-
-    /**
-     * 根据主键删除商品表。
-     *
-     * @param id 主键
-     * @return {@code true} 删除成功，{@code false} 删除失败
-     */
-    /*@DeleteMapping("remove/{id}")
-    boolean remove(@PathVariable Long id);*/
-
-    /**
-     * 根据主键更新商品表。
-     *
-     * @param product 商品表
-     * @return {@code true} 更新成功，{@code false} 更新失败
-     */
-    /*@PutMapping("update")
-    boolean update(@RequestBody ProductReq product);*/
-
-    /**
      * 查询所有商品表。
      *
      * @return 所有数据

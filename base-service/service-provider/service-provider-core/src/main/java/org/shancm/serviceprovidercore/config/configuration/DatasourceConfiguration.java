@@ -19,7 +19,7 @@ import java.util.StringJoiner;
 /**
  * @since 2026-02-19 18:05
  * @author by shancm
- * @description TODO
+ * @description DatasourceConfiguration
  */
 @Configuration
 public class DatasourceConfiguration {

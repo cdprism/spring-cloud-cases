@@ -7,11 +7,9 @@
         <artifactId>service-provider</artifactId>
         <version>0.0.1</version>
     </parent>
+
     <artifactId>service-provider-core</artifactId>
-    <name>service-provider-core</name>
-    <description>service-provider-core</description>
-    <properties>
-    </properties>
+
     <dependencies>
         <!-- 数据源代码生成 -->
         <!--<dependency>
