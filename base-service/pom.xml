@@ -14,8 +14,6 @@
     <!-- 数据源 -->
     <druid.version>1.2.27</druid.version>
     <mybatis-flex.version>1.11.6</mybatis-flex.version>
-
-    <lombok.version>1.18.42</lombok.version>
   </properties>
 
   <dependencies>

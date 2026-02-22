@@ -48,22 +48,102 @@ ALTER USER '你的用户名'@'localhost' IDENTIFIED WITH mysql_native_password B
 -- 刷新权限
 FLUSH PRIVILEGES;
 ```
-3. @EnableDiscoveryClient
-4. spring.cloud.nacos.server-addr=${nacos.server-addr} ***nacos.server-addr*** 在不同环境定义
+3. `@EnableDiscoveryClient`
+4. `spring.cloud.nacos.server-addr=${nacos.server-addr} ***nacos.server-addr***` 在不同环境定义
 
 ## nacos config  
 
-1. 配置文件增加 spring.config.import=nacos:XXX.properties
+1. 配置文件增加 `spring.config.import=nacos:XXX.properties`
 2. 添加property类 添加注解
 ```text
 @Data
 @Component
 @ConfigurationProperties(prefix = "provider")
 ```
-3. 命名空间属性 spring.cloud.nacos.config.namespace=${spring.profiles.active:public}
-4. 配置分组属性 spring.config.import=nacos:provider.properties?**group**=service-provider
+3. 命名空间属性 `spring.cloud.nacos.config.namespace=${spring.profiles.active:public}`
+4. 配置分组属性 `spring.config.import=nacos:provider.properties?**group**=service-provider`
 
 ## openfeign
-1. 在调用方使用注解 @EnableFeignClients
-2. 在提供方定义接口 @FeignClient(name = "service-provider")
+1. 在调用方使用注解 `@EnableFeignClients`
+2. 在提供方定义接口 `@FeignClient(name = "service-provider", path="/provider")`
 3. 在调用方调用接口
+- ### feign 日志 需在调用方配置 且在调用方生效
+1. 配置文件增加 `logging.level.org.shancm.serviceproviderinterface.feign=debug`
+2. `FeignConfiguration` 类配置
+- ### feign 超时控制 
+  `connectTimeout` 连接超时 默认10s `readTimeout` 读取超时 默认60s
+```text
+spring:
+  cloud:
+    openfeign:
+      client:
+        config:
+          # 默认配置
+          default:
+            logger-level: full
+            connect-timeout: 1000
+            read-timeout: 2000
+          # 具体 feign 客户端的超时配置
+          service-product:
+            logger-level: full
+            # 连接超时，3000 毫秒
+            connect-timeout: 3000
+            # 读取超时，5000 毫秒
+            read-timeout: 5000
+```
+- ### feign 重试机制
+在`FeignConfiguration.java`中注册`Retryer` bean
+
+- ### feign 拦截器
+1. 在服务调用方定义拦截器类 `TokenInterceptor.java` 实现`equestInterceptor`
+
+## sentinel `资源`&`规则` 
+1. 启动sentinel-dashboard `java -jar sentinel-dashboard-1.8.9.jar --server.port=8081`
+2. 配置文件增加 `spring.cloud.sentinel.transport.dashboard=localhost:8081` 关闭懒加载 `spring.cloud.sentinel.eager=true`
+
+资源：
+- `框架: feign接口`
+- `@SentinelResource注解`、`@SentinelResourceAspect切面`
+  
+规则
+- `流量控制`&`流量路由`
+- `熔断降级` 在调用方配置 用于保护自身
+- `系统自适应过载保护`
+- `热点流量防护`
+
+### **sentinel 异常处理**
+触发sentinel保护机制后抛出BlockException(包含流控FlowException&热点参数ParamException)异常
+1. 前端或web请求 `BlockExceptionHandler` 在被访问方定义MyBlockExceptionHandler
+2. 被`@SentinelResource`
+3. feign请求的资源 可以用callback兜底返回维护
+- 在接口目录 下创建`callback.XXXFeignClientCallBack` 实现接口 添加@component
+- 在接口上添加`fallback = XXXFeignClientCallBack.class`
+
+### sentinel 降级熔断策略
+- 慢调用比例
+- 异常比例
+- 异常数
+
+### sentinel 系统自适应保护
+- 系统规则：load1、cpu使用率、平均RT、并发线程数
+
+## gateway 网关
+1. 统一入口
+2. 请求路由
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

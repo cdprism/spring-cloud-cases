@@ -70,6 +70,13 @@ public class Result<T> {
         return new Result<>(code, msg, null);
     }
 
+    /*public static  Result<String> failed(String msg, Throwable throwable) {
+        Result<String> failed = failed(msg);
+        // throwable.getCause() 是否为空判断
+        failed.setData(throwable.getCause() != null ? throwable.getCause().toString() : "");
+        return failed;
+    }*/
+
     // ========== 其他快捷方法 ==========
     public static <T> Result<T> error(ResultCode resultCode) {
         return failed(resultCode);

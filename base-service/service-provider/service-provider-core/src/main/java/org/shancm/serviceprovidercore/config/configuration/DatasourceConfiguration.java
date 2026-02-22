@@ -17,9 +17,9 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 /**
- * @since 2026-02-19 18:05
  * @author by shancm
  * @description DatasourceConfiguration
+ * @since 2026-02-19 18:05
  */
 @Configuration
 public class DatasourceConfiguration {
@@ -32,8 +32,9 @@ public class DatasourceConfiguration {
     private String datasourcePassword = "mysql";
     private final static String DRIVE_CLASS_NAME = "org.postgresql.Driver";
     private final static String VALIDATION_QUERY = "SELECT 1";
+
     @Bean
-    public DataSource dataSource() throws SQLException {
+    public DataSource dataSource() {
         //文章:https://developer.aliyun.com/article/932770
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl(datasourceUrl);

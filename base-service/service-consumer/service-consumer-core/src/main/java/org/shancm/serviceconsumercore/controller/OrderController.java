@@ -3,6 +3,8 @@ package org.shancm.serviceconsumercore.controller;
 import com.mybatisflex.core.paginate.Page;
 import org.shancm.serviceconsumercore.entity.Order;
 import org.shancm.serviceconsumercore.service.OrderService;
+import org.shancm.serviceproviderinterface.domain.req.ProductReq;
+import org.shancm.serviceproviderinterface.feign.ServiceProductFeignClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,40 +20,25 @@ import java.util.List;
 @RequestMapping("/order")
 public class OrderController {
 
-    @Autowired
-    private OrderService orderService;
+    private final OrderService orderService;
 
-    /**
-     * 保存订单表。
-     *
-     * @param order 订单表
-     * @return {@code true} 保存成功，{@code false} 保存失败
-     */
-    @PostMapping("save")
-    public boolean save(@RequestBody Order order) {
-        return orderService.save(order);
+    private final ServiceProductFeignClient serviceProductFeignClient;
+
+    public OrderController(OrderService orderService,
+                           ServiceProductFeignClient serviceProductFeignClient) {
+        this.orderService = orderService;
+        this.serviceProductFeignClient = serviceProductFeignClient;
     }
 
-    /**
-     * 根据主键删除订单表。
-     *
-     * @param id 主键
-     * @return {@code true} 删除成功，{@code false} 删除失败
-     */
-    @DeleteMapping("remove/{id}")
-    public boolean remove(@PathVariable Long id) {
-        return orderService.removeById(id);
-    }
+    @GetMapping("/show")
+    public String show(){
 
-    /**
-     * 根据主键更新订单表。
-     *
-     * @param order 订单表
-     * @return {@code true} 更新成功，{@code false} 更新失败
-     */
-    @PutMapping("update")
-    public boolean update(@RequestBody Order order) {
-        return orderService.updateById(order);
+//        return serviceProductFeignClient.list().getData().toString();
+
+        ProductReq req = new ProductReq();
+        req.setProductName("测试");
+        req.setStock(999);
+        return serviceProductFeignClient.postTest(req);
     }
 
     /**

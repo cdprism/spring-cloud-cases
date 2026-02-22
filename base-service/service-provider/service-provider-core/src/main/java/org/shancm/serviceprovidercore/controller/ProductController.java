@@ -36,6 +36,12 @@ public class ProductController implements ServiceProductFeignClient {
     }
 
     @Override
+    @PostMapping("/post-test")
+    public String postTest(@RequestBody ProductReq productReq) {
+        return productReq.toString();
+    }
+
+    @Override
     @GetMapping("/config")
     public String checkConfig() {
         System.out.println(providerProperty.getDateTime());
@@ -47,12 +53,11 @@ public class ProductController implements ServiceProductFeignClient {
         throw new BusinessException(ResultCode.SYSTEM_ERROR);
     }
 
-    @GetMapping("/e2")
+    /*@GetMapping("/e2")
     public void e2() throws Exception {
         List<Integer> list = null;
         list.getFirst();
-    }
-
+    }*/
 
     /**
      * 查询所有商品表。

@@ -4,17 +4,21 @@ import com.mybatisflex.core.paginate.Page;
 import org.shancm.common.domain.Result;
 import org.shancm.serviceproviderinterface.domain.req.ProductReq;
 import org.shancm.serviceproviderinterface.domain.res.ProductRes;
+import org.shancm.serviceproviderinterface.feign.callback.ServiceProductFeignClientCallBack;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
+import javax.security.auth.callback.Callback;
 import java.util.List;
 
 /**
  * @author shancm
  */
-@FeignClient("service-provider")
-@RequestMapping("/product")
+@FeignClient(value = "service-provider", path = "/product", fallback= ServiceProductFeignClientCallBack.class)
 public interface ServiceProductFeignClient {
+
+    @PostMapping("/post-test")
+    String postTest(@RequestBody ProductReq productReq);
 
     @GetMapping("/config")
     String checkConfig();
