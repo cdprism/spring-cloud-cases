@@ -5,7 +5,6 @@ import org.shancm.serviceconsumercore.entity.Order;
 import org.shancm.serviceconsumercore.service.OrderService;
 import org.shancm.serviceproviderinterface.domain.req.ProductReq;
 import org.shancm.serviceproviderinterface.feign.ServiceProductFeignClient;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

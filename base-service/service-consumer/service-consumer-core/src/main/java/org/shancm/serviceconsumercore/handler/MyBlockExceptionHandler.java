@@ -26,7 +26,7 @@ public class MyBlockExceptionHandler implements BlockExceptionHandler {
 
         httpServletResponse.setContentType("application/json;charset=UTF-8");
         httpServletResponse.setStatus(500);
-        Result<String> result = Result.failed("resourceName is "+s+". 接口被限流了. 流量控制接口为:"+e.getClass().toString());
+        Result<String> result = Result.failed("resourceName is "+s+". 接口被限流了. 流量控制接口为:"+e.getClass());
 
         httpServletResponse.getWriter().write(JsonUtils.toJsonString(result));
 

@@ -1,7 +1,6 @@
 package org.shancm.serviceconsumercore.config.configuration;
 
 import feign.Logger;
-import feign.RetryableException;
 import feign.Retryer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

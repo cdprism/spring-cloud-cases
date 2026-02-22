@@ -9,7 +9,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  * @author shancm
  * @since 2026-2-21 16:54:25
  */
-//@EnableFeignClients
+@EnableFeignClients
 @EnableDiscoveryClient
 @SpringBootApplication
 public class ServiceProviderCoreApplication {

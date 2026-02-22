@@ -8,7 +8,6 @@ import org.shancm.serviceproviderinterface.feign.callback.ServiceProductFeignCli
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
-import javax.security.auth.callback.Callback;
 import java.util.List;
 
 /**
