@@ -1,15 +1,18 @@
 # spring-cloud-cases
 
-`对应版本`  
-`jdk 21`  
-`maven 3.9.9`  
-`Spring Boot 3.3.4`  
-`Spring Cloud 2023.0.3`  
-`Spring Cloud Alibaba 2023.0.3.2`  
-`Nacos latest version : 3.1.1`  
-`Sentinel latest versio ： 1.8.9`  
-`Seata 2.2.0`  
-`RocketMQ 5.1.4`  
+⭐`对应版本`
+- `jdk 21`
+- `maven 4.0.0-rc-5`
+- `Spring Boot 4.0.3`
+- `Spring Cloud 2025.1.1`
+- `Spring Cloud Alibaba 2025.1.0.0`
+- `Nacos version : 3.1.1`
+- `Sentinel version ： 1.8.9`
+- `Seata 2.5.0`
+- `RocketMQ 5.3.1`
+- `SchedulerX 1.13.3`
+[B站教程](https://www.bilibili.com/video/BV1UJc2ezEFU)  
+[Github文档](https://github.com/mofan212/spring-cloud-demo/blob/master/README.md)  
 
 - 所有自建工程版本都别包含SNAPSHOT  
 
@@ -112,7 +115,7 @@ spring:
 - `热点流量防护`
 
 ### **sentinel 异常处理**
-触发sentinel保护机制后抛出BlockException(包含流控FlowException&热点参数ParamException)异常
+触发sentinel保护机制后抛出`BlockException`(包含流控`FlowException`&热点参数`ParamException`)异常
 1. 前端或web请求 `BlockExceptionHandler` 在被访问方定义MyBlockExceptionHandler
 2. 被`@SentinelResource`
 3. feign请求的资源 可以用callback兜底返回维护
@@ -154,9 +157,60 @@ spring:
             - Path=/api/product/**
           order: 2
 ```
+在 Spring Cloud Gateway 的实现中，断言的实现都是 `RoutePredicateFactory` 接口的实现。
+
+因此除了直接查看官方文档外确定有哪些断言形式外，还可以通过查看 `RoutePredicateFactory` 的实现：
+
+- HeaderRoutePredicateFactory
+- PathRoutePredicateFactory
+- ReadBodyRoutePredicateFactory
+- BeforeRoutePredicateFactory
+- ...
+
+| 名称                   | 参数（个数/类型）           | 作用                                         |
+|----------------------|---------------------|--------------------------------------------|
+| After                | 1/datetime          | 在指定时间之后                                    |
+| Before               | 1/datetime          | 在指定时间之前                                    |
+| Between              | 2/datetime          | 在指定时间区间内                                   |
+| Cookie               | 2/string,regexp     | 包含 cookie 名且必须匹配指定值                        |
+| Header               | 2/string,regexp     | 包含请求头且必须匹配指定值                              |
+| Host                 | N/string            | 请求 host 必须是指定枚举值                           |
+| Method               | N/string            | 请求方式必须是指定枚举值                               |
+| Path                 | 2/List<String>,bool | 请求路径满足规则，是否匹配最后的 /                         |
+| Query                | 2/string,regexp     | 包含指定请求参数                                   |
+| RemoteAddr           | 1/List<String>      | 请求来源于指定网络域（CIDR写法）                         |
+| Weight               | 2/string,int        | 按指定权重负载均衡                                  |
+| XForwardedRemoteAddr | 1/List<String>      | 从 X-Forwarded-For 请求头中解析请求来源，并判断是否来源于指定网络域 |
 
 
-
+### 自定义断言 配置&Java工厂
+自定义一个名为 `Vip` 的断言规则，要求存在名为 `user` 的请求参数，并且值为 `Shannon` 时才将请求跳转到 https://cn.bing.com：
+```yml
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: bing-route
+          uri: https://cn.bing.com
+          predicates:
+            - name: Path
+              args:
+                patterns: /search
+            - name: Query
+              args:
+                param: q
+                regexp: hi
+            - Vip=user,Shannon
+```
+```yml
+        - id: Vip
+          uri: https://cn.bing.com
+          predicates:
+            - Path=/search
+            - Query=q,hi
+            - Vip=user,Shannon
+```
+- `Vip` 断言规则在 `VipRoutePredicateFactory` 中实现 参考`QueryRoutePredicateFactory`
 
 
 

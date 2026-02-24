@@ -38,15 +38,4 @@ public interface ServiceProductFeignClient {
      */
     @GetMapping("getInfo/{id}")
     Result<ProductRes> getInfo(@PathVariable Long id);
-
-    /**
-     * 分页查询商品表。
-     *
-     * @param page 分页对象
-     * @return 分页对象
-     */
-    @GetMapping("page")
-    Result<Page<ProductRes>> page(Page<ProductReq> page);
-
-
 }

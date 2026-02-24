@@ -1,19 +1,11 @@
 package org.shancm.common.util;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.*;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
@@ -41,9 +33,10 @@ public final class JsonUtils {
     static {
         // 配置序列化特性
         // 1. 序列化时只包含非空字段，可减少数据体积，避免 null 值干扰
-        OBJECT_MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+//        OBJECT_MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
         // 2. 禁止将日期写为时间戳，使用 ISO-8601 格式 (如 "2023-01-01T10:20:30")
-        OBJECT_MAPPER.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+//        OBJECT_MAPPER.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         // 3. 允许单引号字符串（某些非标准 JSON 可能用到）
         // OBJECT_MAPPER.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
         // 4. 允许未转义的控制字符（慎用，安全考虑一般保持默认）
@@ -51,14 +44,14 @@ public final class JsonUtils {
 
         // 配置反序列化特性
         // 1. 忽略 JSON 中存在但 Java 对象不存在的属性，避免 UnknownPropertyException
-        OBJECT_MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+//        OBJECT_MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         // 2. 允许空字符串反序列化为 null（某些场景可能需要）
         // OBJECT_MAPPER.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
         // 3. 对于枚举，如果值不存在，可以使用默认值或抛出异常，这里选择不失败，返回 null
         // OBJECT_MAPPER.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
 
         // 注册 Java 8 日期时间模块
-        OBJECT_MAPPER.registerModule(new JavaTimeModule());
+//        OBJECT_MAPPER.registerModule(new JavaTimeModule());
 
         // 可选：美化输出（默认关闭，需要时使用单独的方法）
         // OBJECT_MAPPER.enable(SerializationFeature.INDENT_OUTPUT);
@@ -81,12 +74,7 @@ public final class JsonUtils {
         if (obj == null) {
             return null;
         }
-        try {
             return OBJECT_MAPPER.writeValueAsString(obj);
-        } catch (JsonProcessingException e) {
-            logger.error("序列化对象为 JSON 字符串失败: {}", obj, e);
-            throw new JsonException("序列化失败", e);
-        }
     }
 
     /**
@@ -100,12 +88,7 @@ public final class JsonUtils {
         if (obj == null) {
             return null;
         }
-        try {
             return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
-        } catch (JsonProcessingException e) {
-            logger.error("序列化对象为格式化 JSON 字符串失败: {}", obj, e);
-            throw new JsonException("序列化失败", e);
-        }
     }
 
     /**
@@ -116,12 +99,7 @@ public final class JsonUtils {
      * @throws JsonException 写入失败时抛出运行时异常
      */
     public static void writeToFile(File file, Object obj) {
-        try {
-            OBJECT_MAPPER.writeValue(file, obj);
-        } catch (IOException e) {
-            logger.error("将对象写入文件失败: file={}, obj={}", file, obj, e);
-            throw new JsonException("写入文件失败", e);
-        }
+        OBJECT_MAPPER.writeValue(file, obj);
     }
 
     /**
@@ -132,12 +110,7 @@ public final class JsonUtils {
      * @throws JsonException 写入失败时抛出运行时异常
      */
     public static void writePrettyToFile(File file, Object obj) {
-        try {
-            OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(file, obj);
-        } catch (IOException e) {
-            logger.error("将对象格式化写入文件失败: file={}, obj={}", file, obj, e);
-            throw new JsonException("写入文件失败", e);
-        }
+        OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(file, obj);
     }
 
     // ========================= 反序列化操作 =========================
@@ -155,12 +128,7 @@ public final class JsonUtils {
         if (json == null || json.trim().isEmpty()) {
             return null;
         }
-        try {
             return OBJECT_MAPPER.readValue(json, clazz);
-        } catch (JsonProcessingException e) {
-            logger.error("解析 JSON 字符串为对象失败: json={}, class={}", json, clazz.getName(), e);
-            throw new JsonException("反序列化失败", e);
-        }
     }
 
     /**
@@ -176,12 +144,7 @@ public final class JsonUtils {
         if (json == null || json.trim().isEmpty()) {
             return null;
         }
-        try {
             return OBJECT_MAPPER.readValue(json, typeReference);
-        } catch (JsonProcessingException e) {
-            logger.error("解析 JSON 字符串为泛型对象失败: json={}, type={}", json, typeReference.getType(), e);
-            throw new JsonException("反序列化失败", e);
-        }
     }
 
     /**
@@ -198,12 +161,7 @@ public final class JsonUtils {
             return null;
         }
         JavaType javaType = OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, elementType);
-        try {
             return OBJECT_MAPPER.readValue(json, javaType);
-        } catch (JsonProcessingException e) {
-            logger.error("解析 JSON 字符串为 List<{}> 失败: json={}", elementType.getSimpleName(), json, e);
-            throw new JsonException("反序列化失败", e);
-        }
     }
 
     /**
@@ -217,12 +175,7 @@ public final class JsonUtils {
         if (json == null || json.trim().isEmpty()) {
             return null;
         }
-        try {
             return OBJECT_MAPPER.readValue(json, new TypeReference<Map<String, Object>>() {});
-        } catch (JsonProcessingException e) {
-            logger.error("解析 JSON 字符串为 Map 失败: json={}", json, e);
-            throw new JsonException("反序列化失败", e);
-        }
     }
 
     /**
@@ -235,12 +188,7 @@ public final class JsonUtils {
      * @throws JsonException 读取或解析失败时抛出运行时异常
      */
     public static <T> T readFromFile(File file, Class<T> clazz) {
-        try {
-            return OBJECT_MAPPER.readValue(file, clazz);
-        } catch (IOException e) {
-            logger.error("从文件读取 JSON 并解析为对象失败: file={}, class={}", file, clazz.getName(), e);
-            throw new JsonException("读取文件失败", e);
-        }
+        return OBJECT_MAPPER.readValue(file, clazz);
     }
 
     /**
@@ -253,12 +201,7 @@ public final class JsonUtils {
      * @throws JsonException 读取或解析失败时抛出运行时异常
      */
     public static <T> T readFromStream(InputStream inputStream, Class<T> clazz) {
-        try {
-            return OBJECT_MAPPER.readValue(inputStream, clazz);
-        } catch (IOException e) {
-            logger.error("从输入流读取 JSON 并解析为对象失败: class={}", clazz.getName(), e);
-            throw new JsonException("读取流失败", e);
-        }
+        return OBJECT_MAPPER.readValue(inputStream, clazz);
     }
 
     // ========================= 树模型操作 =========================
@@ -274,12 +217,7 @@ public final class JsonUtils {
         if (json == null || json.trim().isEmpty()) {
             return null;
         }
-        try {
             return OBJECT_MAPPER.readTree(json);
-        } catch (JsonProcessingException e) {
-            logger.error("解析 JSON 字符串为 JsonNode 失败: json={}", json, e);
-            throw new JsonException("解析 JsonNode 失败", e);
-        }
     }
 
     /**
@@ -305,12 +243,7 @@ public final class JsonUtils {
      * @throws JsonException 转换失败时抛出运行时异常
      */
     public static <T> T nodeToValue(JsonNode jsonNode, Class<T> clazz) {
-        try {
             return OBJECT_MAPPER.treeToValue(jsonNode, clazz);
-        } catch (JsonProcessingException e) {
-            logger.error("JsonNode 转换为对象失败: node={}, class={}", jsonNode, clazz.getName(), e);
-            throw new JsonException("节点转换失败", e);
-        }
     }
 
     // ========================= 类型转换 =========================
@@ -351,12 +284,8 @@ public final class JsonUtils {
         if (json == null || json.trim().isEmpty()) {
             return false;
         }
-        try {
             OBJECT_MAPPER.readTree(json);
             return true;
-        } catch (JsonProcessingException e) {
-            return false;
-        }
     }
 
     /**

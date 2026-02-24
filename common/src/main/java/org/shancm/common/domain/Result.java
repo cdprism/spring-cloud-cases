@@ -1,7 +1,7 @@
 package org.shancm.common.domain;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Data;
+import lombok.*;
 import org.shancm.common.domain.enums.ResultCode;
 
 import java.time.Instant;
@@ -11,26 +11,16 @@ import java.time.Instant;
  * @description Result<T>
  * @since 2026-02-21 22:41
  */
-@Data
-@JsonInclude(JsonInclude.Include.NON_NULL)  // 序列化时忽略 null 字段
+@ToString
+@Getter
+@Builder
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Result<T> {
-    private T data;
 
     private int code;
     private String msg;
-
-    private Instant timestamp;
-    // 私有构造方法，只能通过静态方法创建
-    /*private Result() {
-        this.timestamp = Instant.now();
-    }*/
-
-    // 全参构造（供内部使用）
-    private Result(int code, String msg, T data) {
-        this.code = code;
-        this.msg = msg;
-        this.data = data;
-    }
+    private T data;
+//    private Instant timestamp;
 
     // ========== 成功静态方法 ==========
     public static <T> Result<T> success() {
@@ -76,15 +66,6 @@ public class Result<T> {
         failed.setData(throwable.getCause() != null ? throwable.getCause().toString() : "");
         return failed;
     }*/
-
-    // ========== 其他快捷方法 ==========
-    public static <T> Result<T> error(ResultCode resultCode) {
-        return failed(resultCode);
-    }
-
-    public static <T> Result<T> error(String msg) {
-        return failed(msg);
-    }
 
     // ========== 链式设置（可选） ==========
     public Result<T> code(int code) {

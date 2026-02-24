@@ -36,9 +36,4 @@ public class ServiceProductFeignClientCallBack implements ServiceProductFeignCli
     public Result<ProductRes> getInfo(Long id) {
         return Result.failed();
     }
-
-    @Override
-    public Result<Page<ProductRes>> page(Page<ProductReq> page) {
-        return Result.failed();
-    }
 }

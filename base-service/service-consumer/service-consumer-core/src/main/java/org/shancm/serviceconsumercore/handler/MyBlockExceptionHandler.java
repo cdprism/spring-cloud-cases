@@ -20,15 +20,15 @@ public class MyBlockExceptionHandler implements BlockExceptionHandler {
      * @param s 为资源名称resourceName
      */
     @Override
-    public void handle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
+    public void handle(HttpServletRequest request, HttpServletResponse response,
                        String s, BlockException e) throws Exception {
 
-
-        httpServletResponse.setContentType("application/json;charset=UTF-8");
-        httpServletResponse.setStatus(500);
+        response.setContentType("application/json;charset=UTF-8");
+        response.setStatus(500);
         Result<String> result = Result.failed("resourceName is "+s+". 接口被限流了. 流量控制接口为:"+e.getClass());
 
-        httpServletResponse.getWriter().write(JsonUtils.toJsonString(result));
+        response.getWriter().write(JsonUtils.toJsonString(result));
 
     }
+
 }

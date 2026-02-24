@@ -2,6 +2,7 @@ package org.shancm.common.domain.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author shancm
@@ -21,4 +22,5 @@ public enum ResultCode {
 
     private final int code;
     private final String msg;
+
 }

@@ -15,6 +15,7 @@ import org.shancm.serviceproviderinterface.feign.ServiceProductFeignClient;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 商品表 控制层。
@@ -67,14 +68,7 @@ public class ProductController implements ServiceProductFeignClient {
     @Override
     @GetMapping("list")
     public Result<List<ProductRes>> list() {
-
-        List<ProductRes> resList = JsonUtils.convertValue(
-                productService.list(),
-                new TypeReference<>() {
-                }
-        );
-
-        return Result.success(resList);
+        return Result.success(JsonUtils.parseArray(productService.list().toString(), ProductRes.class));
     }
 
     /**
@@ -87,27 +81,8 @@ public class ProductController implements ServiceProductFeignClient {
     @GetMapping("getInfo/{id}")
     public Result<ProductRes> getInfo(@PathVariable Long id) {
 
-        return Result.success(JsonUtils.convertValue(productService.getById(id), ProductRes.class));
+        return Result.success(JsonUtils.parseObject(Objects.requireNonNull(productService.getById(id)).toString(), ProductRes.class));
     }
 
-    /**
-     * 分页查询商品表。
-     *
-     * @param req 分页对象
-     * @return 分页对象
-     */
-    @Override
-    @GetMapping("page")
-    public Result<Page<ProductRes>> page(Page<ProductReq> req) {
-        Page<Product> page = JsonUtils.convertValue(req, new TypeReference<>() {
-        });
-
-        Page<Product> pages = productService.page(page);
-
-        Page<ProductRes> productResPage = JsonUtils.convertValue(pages, new TypeReference<>() {
-        });
-
-        return Result.success(productResPage);
-    }
 
 }

@@ -1,19 +1,12 @@
 package org.shancm.serviceprovidercore.config.configuration;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.support.jakarta.StatViewServlet;
-import com.alibaba.druid.support.jakarta.WebStatFilter;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.StringJoiner;
 
 /**
@@ -101,32 +94,4 @@ public class DatasourceConfiguration {
         return dataSource;
     }
 
-    /* ================= Druid 控制台 ================= */
-    @Bean
-    @ConditionalOnProperty(name = "druid.stat-view.enabled", havingValue = "true")
-    public ServletRegistrationBean<StatViewServlet> druidStatViewServlet() {
-
-
-        ServletRegistrationBean<StatViewServlet> bean =
-                new ServletRegistrationBean<>(new StatViewServlet(), "/druid/*");
-
-        Map<String, String> params = new HashMap<>();
-        params.put("loginUsername", "druid");
-        params.put("loginPassword", "druid");
-        params.put("allow", "");
-
-        bean.setInitParameters(params);
-        return bean;
-    }
-
-    @Bean
-    public FilterRegistrationBean<WebStatFilter> druidWebStatFilter() {
-
-        FilterRegistrationBean<WebStatFilter> bean =
-                new FilterRegistrationBean<>(new WebStatFilter());
-
-        bean.addUrlPatterns("/*");
-        bean.addInitParameter("exclusions", "*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*");
-        return bean;
-    }
 }
