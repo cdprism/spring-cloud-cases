@@ -3,13 +3,14 @@ spring:
     gateway:
       server:
         webflux:
-          routes:
+#          routes:
 #            - id: bing-route
 #              uri: https://cn.bing.com
 #              predicates:
 #                - Path=/**
 #              order: 10
-#              # id 全局唯一
+              # id 全局唯一
+
 #            - id: order-route
 #              # 指定服务名称
 #              uri: lb://service-order
@@ -22,13 +23,27 @@ spring:
 #              predicates:
 #                - Path=/api/product/**
 #              order: 2
-#            - id: consumer-route
+
+
+#            - id: order
 #              uri: lb://service-consumer
 #              predicates:
 #                - Path=/order/**
-            - id: Vip
-              uri: https://cn.bing.com
-              predicates:
-                - Path=/search
-                - Query=q,hi
-                - Vip=user,Shannon
+#            - id: Vip
+#              uri: https://cn.bing.com
+#              predicates:
+#                - Path=/search
+#                - Query=q,hi
+#                - Vip=user,Shannon
+
+          #⭐default-filters:不生效 因为webflux版本原因
+#          default-filters:
+#            - AddRequestHeader=X-Request-Foo, Bar
+
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                #请求来源地址
+                allowed-origin-patterns: '*'
+                allowed-headers: '*'
+                allowedMethods: '*'

@@ -1,6 +1,5 @@
 package org.shancm.serviceprovidercore.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.mybatisflex.core.paginate.Page;
 import org.shancm.common.domain.Result;
 import org.shancm.common.domain.enums.ResultCode;

@@ -10,7 +10,7 @@
 - `Sentinel version ： 1.8.9`
 - `Seata 2.5.0`
 - `RocketMQ 5.3.1`
-- `SchedulerX 1.13.3`
+- `SchedulerX 1.13.3`  
 [B站教程](https://www.bilibili.com/video/BV1UJc2ezEFU)  
 [Github文档](https://github.com/mofan212/spring-cloud-demo/blob/master/README.md)  
 
@@ -132,7 +132,7 @@ spring:
 
 ## gateway 网关
 `统一入口` `请求路由` `权限校验` `流量监控` `熔断降级` `限流` `日志` `过滤器`
-1. 路由规则
+1. 路由规则-配置
 ```yaml
 spring:
   cloud:
@@ -156,6 +156,19 @@ spring:
           predicates:
             - Path=/api/product/**
           order: 2
+```
+2. 路由规则-代码  
+`GatewayRoutesConfiguration`
+```java
+@Bean
+    public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
+        return builder.routes()
+                .route("order", r -> r
+                        .path("/order/**")
+                        .uri("lb://service-consumer"))
+
+                .build();
+    }
 ```
 在 Spring Cloud Gateway 的实现中，断言的实现都是 `RoutePredicateFactory` 接口的实现。
 
@@ -212,8 +225,12 @@ spring:
 ```
 - `Vip` 断言规则在 `VipRoutePredicateFactory` 中实现 参考`QueryRoutePredicateFactory`
 
+### 全局过滤器&自定义过滤器
 
+- 全局过滤器 实现`GlobalFilter`
+- 自定义过滤器 实现`GatewayFilter`
 
+### 全局跨域
 
 
 

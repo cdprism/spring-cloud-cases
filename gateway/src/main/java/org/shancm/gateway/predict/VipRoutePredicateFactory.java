@@ -3,6 +3,7 @@ package org.shancm.gateway.predict;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.Setter;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.cloud.gateway.handler.predicate.AbstractRoutePredicateFactory;
 import org.springframework.cloud.gateway.handler.predicate.GatewayPredicate;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -41,7 +42,8 @@ public class VipRoutePredicateFactory extends AbstractRoutePredicateFactory<VipR
     }
 
     @Override
-    public Predicate<ServerWebExchange> apply(Config config) {
+    @NullMarked
+    public Predicate<ServerWebExchange> apply( Config config) {
         return new GatewayPredicate() {
 
             @Override

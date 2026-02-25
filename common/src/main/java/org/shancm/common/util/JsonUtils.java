@@ -2,307 +2,324 @@ package org.shancm.common.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.json.JsonReadFeature;
 import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.*;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.cfg.DateTimeFeature;
+import tools.jackson.databind.json.JsonMapper;
 
-import java.io.File;
-import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 /**
- * 基于 Jackson 2.x 的 JSON 处理工具类
+ * 基于 Jackson 3.x 的 JSON 工具类
  * <p>
- * 设计原则：
- * 1. 线程安全：ObjectMapper 是线程安全的，可以全局共享一个实例。
- * 2. 配置合理：禁用反序列化未知属性，注册 Java 8 时间模块，设置日期格式等。
- * 3. 异常处理：将受检异常转换为运行时异常，简化调用。
- * 4. 泛型支持：提供 TypeReference 和 JavaType 支持复杂泛型类型。
- * 5. 常用功能：序列化、反序列化、格式化输出、树模型操作、类型转换等。
+ * 提供线程安全、高性能的 JSON 序列化与反序列化操作。
+ * 内部使用单例 ObjectMapper，并配置了常用的特性：
+ * <ul>
+ *     <li>反序列化时忽略未知属性</li>
+ *     <li>序列化时只包含非空字段</li>
+ *     <li>统一日期格式为 "yyyy-MM-dd HH:mm:ss" 并设置为 UTC 时区</li>
+ *     <li>支持 Java 8 日期时间类型（如 LocalDateTime）</li>
+ *     <li>允许 JSON 中包含注释（非标准，但方便调试）</li>
+ * </ul>
+ * 所有方法均将受检异常转换为运行时异常，简化调用。
  *
- * @author shancm
- * @since 2026-02-22 8:59
+ * @author your-name
+ * @since 1.0.0
  */
 public final class JsonUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(JsonUtils.class);
+    private static final Logger log = LoggerFactory.getLogger(JsonUtils.class);
 
-    // 全局共享的 ObjectMapper 实例
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    /**
+     * 默认日期格式
+     */
+    private static final String DEFAULT_DATE_PATTERN = "yyyy-MM-dd HH:mm:ss";
+
+    /**
+     * 默认时区：UTC
+     */
+    private static final TimeZone DEFAULT_TIME_ZONE = TimeZone.getTimeZone("UTC");
+
+    /**
+     * 线程安全的 ObjectMapper 单例
+     */
+    private static final ObjectMapper OBJECT_MAPPER;
 
     static {
-        // 配置序列化特性
-        // 1. 序列化时只包含非空字段，可减少数据体积，避免 null 值干扰
-//        OBJECT_MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        // 使用 JsonMapper.builder() 构建 ObjectMapper（Jackson 3.x 推荐方式）
+        OBJECT_MAPPER = JsonMapper.builder()
+                // 反序列化时，遇到未知属性（JSON 中有而 Java 对象中没有）不抛出异常
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                // 序列化时，遇到空 Bean 不抛出异常（返回空对象）
+                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+                // 允许 JSON 中包含注释（如 // 或 /* */）
+                // ⭐设置为不允许了 不允许应该是default的
+                .configure(JsonReadFeature.ALLOW_JAVA_COMMENTS, false)
+                // 允许字段名不带引号（较少用，但可增加灵活性）
+                .configure(JsonReadFeature.ALLOW_UNQUOTED_PROPERTY_NAMES, true)
+                // 设置日期格式
+                .defaultDateFormat(new SimpleDateFormat(DEFAULT_DATE_PATTERN))
+                // 设置时区
+                .defaultTimeZone(DEFAULT_TIME_ZONE)
+                // 注册 Java 8 时间模块（处理 LocalDate, LocalDateTime 等）
+                //⭐这里不需要了应该是
+//                .addModule(new JavaTimeModule())
+                // 禁用将日期写为时间戳的行为（统一使用字符串格式）
+                .configure(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                .build();
 
-        // 2. 禁止将日期写为时间戳，使用 ISO-8601 格式 (如 "2023-01-01T10:20:30")
-//        OBJECT_MAPPER.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        // 3. 允许单引号字符串（某些非标准 JSON 可能用到）
-        // OBJECT_MAPPER.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
-        // 4. 允许未转义的控制字符（慎用，安全考虑一般保持默认）
-        // OBJECT_MAPPER.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
 
-        // 配置反序列化特性
-        // 1. 忽略 JSON 中存在但 Java 对象不存在的属性，避免 UnknownPropertyException
-//        OBJECT_MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        // 2. 允许空字符串反序列化为 null（某些场景可能需要）
-        // OBJECT_MAPPER.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
-        // 3. 对于枚举，如果值不存在，可以使用默认值或抛出异常，这里选择不失败，返回 null
-        // OBJECT_MAPPER.configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
-
-        // 注册 Java 8 日期时间模块
-//        OBJECT_MAPPER.registerModule(new JavaTimeModule());
-
-        // 可选：美化输出（默认关闭，需要时使用单独的方法）
-        // OBJECT_MAPPER.enable(SerializationFeature.INDENT_OUTPUT);
     }
 
     private JsonUtils() {
-        // 工具类私有构造
+        // 工具类，私有构造器
     }
 
-    // ========================= 序列化操作 =========================
+    // ============================ 序列化方法 ============================
 
     /**
-     * 将对象序列化为 JSON 字符串（紧凑格式）
+     * 将对象转换为 JSON 字符串（格式化输出，带缩进）
      *
-     * @param obj 要序列化的对象
-     * @return JSON 字符串，若对象为 null 返回 null
-     * @throws JsonException 序列化失败时抛出运行时异常
+     * @param obj 要转换的对象
+     * @return JSON 字符串，若对象为 null 则返回 "null"
+     */
+    public static String toJsonStringPretty(Object obj) {
+        try {
+            return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+        } catch (JacksonException e) {
+            log.error("序列化对象为格式化 JSON 字符串失败: {}", obj, e);
+            throw new JsonRuntimeException("序列化失败", e);
+        }
+    }
+
+    /**
+     * 将对象转换为 JSON 字符串（紧凑格式）
+     *
+     * @param obj 要转换的对象
+     * @return JSON 字符串，若对象为 null 则返回 "null"
      */
     public static String toJsonString(Object obj) {
-        if (obj == null) {
-            return null;
-        }
+        try {
             return OBJECT_MAPPER.writeValueAsString(obj);
-    }
-
-    /**
-     * 将对象序列化为格式化的 JSON 字符串（带有缩进和换行）
-     *
-     * @param obj 要序列化的对象
-     * @return 格式化后的 JSON 字符串，若对象为 null 返回 null
-     * @throws JsonException 序列化失败时抛出运行时异常
-     */
-    public static String toPrettyJsonString(Object obj) {
-        if (obj == null) {
-            return null;
+        } catch (JacksonException e) {
+            log.error("序列化对象为 JSON 字符串失败: {}", obj, e);
+            throw new JsonRuntimeException("序列化失败", e);
         }
-            return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
     }
 
     /**
-     * 将对象写入文件（紧凑格式）
+     * 将对象转换为字节数组（UTF-8 编码的 JSON）
      *
-     * @param file 目标文件
-     * @param obj  要写入的对象
-     * @throws JsonException 写入失败时抛出运行时异常
+     * @param obj 要转换的对象
+     * @return 字节数组
      */
-    public static void writeToFile(File file, Object obj) {
-        OBJECT_MAPPER.writeValue(file, obj);
+    public static byte[] toJsonBytes(Object obj) {
+        try {
+            return OBJECT_MAPPER.writeValueAsBytes(obj);
+        } catch (JacksonException e) {
+            log.error("序列化对象为 JSON 字节数组失败: {}", obj, e);
+            throw new JsonRuntimeException("序列化失败", e);
+        }
     }
 
-    /**
-     * 将对象写入文件（格式化格式）
-     *
-     * @param file 目标文件
-     * @param obj  要写入的对象
-     * @throws JsonException 写入失败时抛出运行时异常
-     */
-    public static void writePrettyToFile(File file, Object obj) {
-        OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(file, obj);
-    }
-
-    // ========================= 反序列化操作 =========================
+    // ============================ 反序列化方法 ============================
 
     /**
-     * 将 JSON 字符串反序列化为指定类型的对象
+     * 将 JSON 字符串转换为指定类型的对象
      *
      * @param json  JSON 字符串
      * @param clazz 目标类型 Class
-     * @param <T>   泛型参数
-     * @return 反序列化后的对象
-     * @throws JsonException 反序列化失败时抛出运行时异常
+     * @param <T>   泛型
+     * @return 目标对象
      */
     public static <T> T parseObject(String json, Class<T> clazz) {
-        if (json == null || json.trim().isEmpty()) {
-            return null;
-        }
+        try {
             return OBJECT_MAPPER.readValue(json, clazz);
+        } catch (JacksonException e) {
+            log.error("反序列化 JSON 到对象失败, json: {}, class: {}", json, clazz, e);
+            throw new JsonRuntimeException("反序列化失败", e);
+        }
     }
 
     /**
-     * 将 JSON 字符串反序列化为泛型类型对象（使用 TypeReference）
+     * 将字节数组（UTF-8 编码的 JSON）转换为指定类型的对象
+     *
+     * @param bytes JSON 字节数组
+     * @param clazz 目标类型 Class
+     * @param <T>   泛型
+     * @return 目标对象
+     */
+    public static <T> T parseObject(byte[] bytes, Class<T> clazz) {
+        try {
+            return OBJECT_MAPPER.readValue(bytes, clazz);
+        } catch (JacksonException e) {
+            log.error("反序列化 JSON 字节数组到对象失败, class: {}", clazz, e);
+            throw new JsonRuntimeException("反序列化失败", e);
+        }
+    }
+
+    /**
+     * 将 JSON 字符串转换为泛型集合/复杂类型，如 List<Xxx>、Map<String, Xxx> 等
+     * <pre>
+     * 示例：
+     * List<User> userList = parseObject(jsonString, new TypeReference&lt;List&lt;User&gt;&gt;() {});
+     * Map<String, Object> map = parseObject(jsonString, new TypeReference&lt;Map&lt;String, Object&gt;&gt;() {});
+     * </pre>
      *
      * @param json          JSON 字符串
-     * @param typeReference TypeReference 实例，例如 new TypeReference<List<User>>() {}
-     * @param <T>           泛型参数
-     * @return 反序列化后的对象
-     * @throws JsonException 反序列化失败时抛出运行时异常
+     * @param typeReference TypeReference 子类型实例
+     * @param <T>           泛型
+     * @return 目标对象
      */
     public static <T> T parseObject(String json, TypeReference<T> typeReference) {
-        if (json == null || json.trim().isEmpty()) {
-            return null;
-        }
+        try {
             return OBJECT_MAPPER.readValue(json, typeReference);
-    }
-
-    /**
-     * 将 JSON 字符串反序列化为指定类型的 List
-     *
-     * @param json        JSON 字符串
-     * @param elementType List 元素类型
-     * @param <T>         元素泛型
-     * @return List 对象
-     * @throws JsonException 反序列化失败时抛出运行时异常
-     */
-    public static <T> List<T> parseArray(String json, Class<T> elementType) {
-        if (json == null || json.trim().isEmpty()) {
-            return null;
+        } catch (JacksonException e) {
+            log.error("反序列化 JSON 到复杂类型失败, json: {}, type: {}", json, typeReference.getType(), e);
+            throw new JsonRuntimeException("反序列化失败", e);
         }
-        JavaType javaType = OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, elementType);
-            return OBJECT_MAPPER.readValue(json, javaType);
     }
 
     /**
-     * 将 JSON 字符串反序列化为 Map<String, Object>
+     * 将 JSON 字符串转换为 List
+     *
+     * @param json  JSON 字符串
+     * @param clazz List 内元素的类型
+     * @param <T>   泛型
+     * @return List 对象
+     */
+    public static <T> List<T> parseArray(String json, Class<T> clazz) {
+        try {
+            return OBJECT_MAPPER.readValue(json,
+                    OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, clazz));
+        } catch (JacksonException e) {
+            log.error("反序列化 JSON 到 List 失败, json: {}, elementClass: {}", json, clazz, e);
+            throw new JsonRuntimeException("反序列化失败", e);
+        }
+    }
+
+    /**
+     * 将 JSON 字符串转换为 Map <String, Object>
      *
      * @param json JSON 字符串
      * @return Map 对象
-     * @throws JsonException 反序列化失败时抛出运行时异常
      */
     public static Map<String, Object> parseMap(String json) {
-        if (json == null || json.trim().isEmpty()) {
-            return null;
+        return parseObject(json, new TypeReference<Map<String, Object>>() {});
+    }
+
+    /**
+     * 将 JSON 字符串转换为 Map《String, T》
+     *
+     * @param json  JSON 字符串
+     * @param clazz Map 值类型
+     * @param <T>   泛型
+     * @return Map 对象
+     */
+    public static <T> Map<String, T> parseMap(String json, Class<T> clazz) {
+        try {
+            return OBJECT_MAPPER.readValue(json,
+                    OBJECT_MAPPER.getTypeFactory().constructMapType(Map.class, String.class, clazz));
+        } catch (JacksonException e) {
+            log.error("反序列化 JSON 到 Map 失败, json: {}, valueClass: {}", json, clazz, e);
+            throw new JsonRuntimeException("反序列化失败", e);
         }
-            return OBJECT_MAPPER.readValue(json, new TypeReference<Map<String, Object>>() {});
     }
 
     /**
-     * 从文件读取 JSON 并反序列化为指定类型对象
-     *
-     * @param file  源文件
-     * @param clazz 目标类型 Class
-     * @param <T>   泛型参数
-     * @return 反序列化后的对象
-     * @throws JsonException 读取或解析失败时抛出运行时异常
-     */
-    public static <T> T readFromFile(File file, Class<T> clazz) {
-        return OBJECT_MAPPER.readValue(file, clazz);
-    }
-
-    /**
-     * 从输入流读取 JSON 并反序列化为指定类型对象
-     *
-     * @param inputStream 输入流
-     * @param clazz       目标类型 Class
-     * @param <T>         泛型参数
-     * @return 反序列化后的对象
-     * @throws JsonException 读取或解析失败时抛出运行时异常
-     */
-    public static <T> T readFromStream(InputStream inputStream, Class<T> clazz) {
-        return OBJECT_MAPPER.readValue(inputStream, clazz);
-    }
-
-    // ========================= 树模型操作 =========================
-
-    /**
-     * 将 JSON 字符串解析为 JsonNode 树
+     * 将 JSON 字符串解析为 Jackson 的 JsonNode，可用于动态读取部分字段
      *
      * @param json JSON 字符串
-     * @return JsonNode 节点，如果输入为空或无效返回 null
-     * @throws JsonException 解析失败时抛出运行时异常
+     * @return JsonNode
      */
-    public static JsonNode parseJsonNode(String json) {
-        if (json == null || json.trim().isEmpty()) {
-            return null;
-        }
+    public static JsonNode parseTree(String json) {
+        try {
             return OBJECT_MAPPER.readTree(json);
+        } catch (JacksonException e) {
+            log.error("解析 JSON 树失败, json: {}", json, e);
+            throw new JsonRuntimeException("解析 JSON 树失败", e);
+        }
     }
 
     /**
      * 将对象转换为 JsonNode 树
      *
      * @param obj 源对象
-     * @return JsonNode 节点
+     * @return JsonNode
      */
-    public static JsonNode toJsonNode(Object obj) {
-        if (obj == null) {
-            return null;
-        }
+    public static JsonNode toTree(Object obj) {
         return OBJECT_MAPPER.valueToTree(obj);
     }
 
-    /**
-     * 从 JsonNode 中提取值，并转换为指定类型
-     *
-     * @param jsonNode JsonNode 节点
-     * @param clazz    目标类型 Class
-     * @param <T>      泛型参数
-     * @return 转换后的对象
-     * @throws JsonException 转换失败时抛出运行时异常
-     */
-    public static <T> T nodeToValue(JsonNode jsonNode, Class<T> clazz) {
-            return OBJECT_MAPPER.treeToValue(jsonNode, clazz);
-    }
-
-    // ========================= 类型转换 =========================
+    // ============================ 转换与判断 ============================
 
     /**
-     * 将对象转换为另一种类型（基于 Jackson 的转换器）
+     * 判断字符串是否为合法的 JSON 格式（通过尝试解析为 JsonNode 判断）
      *
-     * @param fromValue   源对象
-     * @param toValueType 目标类型 Class
-     * @param <T>         目标泛型
-     * @return 转换后的对象
-     */
-    public static <T> T convertValue(Object fromValue, Class<T> toValueType) {
-        return OBJECT_MAPPER.convertValue(fromValue, toValueType);
-    }
-
-    /**
-     * 将对象转换为另一种类型（基于 TypeReference）
-     *
-     * @param fromValue     源对象
-     * @param typeReference 目标类型 TypeReference
-     * @param <T>           目标泛型
-     * @return 转换后的对象
-     */
-    public static <T> T convertValue(Object fromValue, TypeReference<T> typeReference) {
-        return OBJECT_MAPPER.convertValue(fromValue, typeReference);
-    }
-
-    // ========================= 其他实用方法 =========================
-
-    /**
-     * 检查一个字符串是否是有效的 JSON（仅检查格式，不保证语义）
-     *
-     * @param json 字符串
-     * @return 如果可以解析为树模型，返回 true
+     * @param json 待检查字符串
+     * @return true 如果是合法 JSON
      */
     public static boolean isValidJson(String json) {
-        if (json == null || json.trim().isEmpty()) {
+        if (json == null || json.isEmpty()) {
             return false;
         }
+        try {
             OBJECT_MAPPER.readTree(json);
             return true;
+        } catch (JacksonException e) {
+            return false;
+        }
     }
 
     /**
-     * 获取底层的 ObjectMapper 实例（谨慎使用，通常不推荐暴露）
-     * 仅用于需要高级配置的场景，且不应修改其配置以免影响全局
+     * 将对象转换为指定类型（深度转换，例如将 Map 转换为 POJO）
      *
-     * @return ObjectMapper 实例
+     * @param obj   源对象（如 Map、JsonNode）
+     * @param clazz 目标类型
+     * @param <T>   泛型
+     * @return 转换后的对象
      */
-    public static ObjectMapper getObjectMapper() {
-        return OBJECT_MAPPER;
+    public static <T> T convertValue(Object obj, Class<T> clazz) {
+        try {
+            return OBJECT_MAPPER.convertValue(obj, clazz);
+        } catch (IllegalArgumentException e) {
+            log.error("对象转换失败, obj: {}, class: {}", obj, clazz, e);
+            throw new JsonRuntimeException("对象转换失败", e);
+        }
     }
 
     /**
-     * 自定义运行时异常，包装 Jackson 的受检异常
+     * 将对象转换为泛型类型（深度转换）
+     *
+     * @param obj           源对象
+     * @param typeReference 目标类型引用
+     * @param <T>           泛型
+     * @return 转换后的对象
      */
-    public static class JsonException extends RuntimeException {
-        public JsonException(String message, Throwable cause) {
+    public static <T> T convertValue(Object obj, TypeReference<T> typeReference) {
+        try {
+            return OBJECT_MAPPER.convertValue(obj, typeReference);
+        } catch (IllegalArgumentException e) {
+            log.error("对象转换失败, obj: {}, type: {}", obj, typeReference.getType(), e);
+            throw new JsonRuntimeException("对象转换失败", e);
+        }
+    }
+
+    // ============================ 内部异常类 ============================
+
+    /**
+     * JSON 处理运行时异常，包装受检异常
+     */
+    public static class JsonRuntimeException extends RuntimeException {
+        public JsonRuntimeException(String message, Throwable cause) {
             super(message, cause);
         }
     }
