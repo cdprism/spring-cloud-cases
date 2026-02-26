@@ -249,13 +249,14 @@ spring:
 ```yml
 seata:
   config:
-    type: nacos
-    nacos:
-      server-addr: 127.0.0.1:8848
-      group: SEATA_GROUP
-      namespace:
-      username: nacos
-      password: nacos
+    # type: nacos
+    # nacos:
+    #   server-addr: 127.0.0.1:8848
+    #   group: SEATA_GROUP
+    #   namespace: 
+    #   username: nacos
+    #   password: nacos
+    type: file
   registry:
     type: nacos
     nacos:
@@ -266,6 +267,12 @@ seata:
       cluster: default
       username: nacos
       password: nacos
+      # seata:
+      #   server-addr: 127.0.0.1:8081
+      #   cluster: default
+      #   namespace: public
+      # username: seata
+      # password: seata
   store:
     mode: db # 使用数据库模式存储事务日志，生产环境推荐
     db:
@@ -275,10 +282,19 @@ seata:
       url: jdbc:postgresql://localhost:5432/seata_server?currentSchema=public&stringtype=unspecified
       user: postgres
       password: mysql
+      minConn: 5
+      maxConn: 50
+      globalTable: global_table
+      branchTable: branch_table
+      lockTable: lock_table
+      distributedLockTable: distributed_lock
+      queryLimit: 1000
+      maxWait: 5000
 ```
 2. 业务服务配置 `application.yaml`
 ```yml
 seata:
+  enable-auto-data-source-proxy: true
   registry:
     type: nacos
     nacos:
@@ -296,10 +312,11 @@ seata:
   service:
     vgroup-mapping:
       default_tx_group: default
+  enabled: true
 ```
 3. 创建库 `seata-server\script\server\db`
-工程注解`@EnableTransactionManagement`
-方法注解`@GlobalTransactional`
+4. 工程注解`@EnableTransactionManagement`
+5. 方法注解`@GlobalTransactional`
 
 
 
