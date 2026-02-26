@@ -12,7 +12,7 @@ import java.sql.Timestamp;
 
 /**
  * @author by shancm
- * @description TODO
+ * @description ProductRes
  * @since 2026-02-21 22:25
  */
 @Data

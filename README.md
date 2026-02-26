@@ -317,6 +317,7 @@ seata:
 3. 创建库 `seata-server\script\server\db`
 4. 工程注解`@EnableTransactionManagement`
 5. 方法注解`@GlobalTransactional`
+6. 加断点检查`global_table` `branch_table` `undo_log`是否有数据
 
 
 
