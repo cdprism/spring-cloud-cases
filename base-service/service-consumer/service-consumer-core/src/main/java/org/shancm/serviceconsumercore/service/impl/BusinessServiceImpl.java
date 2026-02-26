@@ -4,7 +4,6 @@ import org.apache.seata.spring.annotation.GlobalTransactional;
 import org.shancm.serviceconsumercore.service.BusinessService;
 import org.shancm.serviceconsumercore.service.OrderService;
 import org.shancm.serviceproviderinterface.feign.ProductFeignClient;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**

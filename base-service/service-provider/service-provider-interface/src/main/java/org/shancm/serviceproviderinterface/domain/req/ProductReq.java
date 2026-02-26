@@ -1,6 +1,5 @@
 package org.shancm.serviceproviderinterface.domain.req;
 
-import com.mybatisflex.annotation.Id;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
