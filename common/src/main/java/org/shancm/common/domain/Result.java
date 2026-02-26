@@ -8,10 +8,10 @@ import org.shancm.common.domain.enums.ResultCode;
  * @description Result<T>
  * @since 2026-02-21 22:41
  */
-@ToString
-@Getter
+@Data
 @Builder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Result<T> {
 
     private int code;

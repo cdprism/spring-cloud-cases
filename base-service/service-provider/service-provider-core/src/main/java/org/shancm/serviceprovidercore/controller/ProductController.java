@@ -1,16 +1,17 @@
 package org.shancm.serviceprovidercore.controller;
 
-import com.mybatisflex.core.paginate.Page;
+import org.apache.seata.core.context.RootContext;
 import org.shancm.common.domain.Result;
 import org.shancm.common.domain.enums.ResultCode;
 import org.shancm.common.exception.BusinessException;
+import org.shancm.common.exception.DataException;
 import org.shancm.common.util.JsonUtils;
 import org.shancm.serviceprovidercore.config.property.ProviderProperty;
 import org.shancm.serviceprovidercore.entity.Product;
 import org.shancm.serviceprovidercore.service.ProductService;
 import org.shancm.serviceproviderinterface.domain.req.ProductReq;
 import org.shancm.serviceproviderinterface.domain.res.ProductRes;
-import org.shancm.serviceproviderinterface.feign.ServiceProductFeignClient;
+import org.shancm.serviceproviderinterface.feign.ProductFeignClient;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,7 +25,7 @@ import java.util.Objects;
  */
 @RestController
 @RequestMapping("/product")
-public class ProductController implements ServiceProductFeignClient {
+public class ProductController implements ProductFeignClient {
 
     private final ProductService productService;
     private final ProviderProperty providerProperty;
@@ -53,21 +54,40 @@ public class ProductController implements ServiceProductFeignClient {
         throw new BusinessException(ResultCode.SYSTEM_ERROR);
     }
 
-    /*@GetMapping("/e2")
-    public void e2() throws Exception {
-        List<Integer> list = null;
-        list.getFirst();
-    }*/
-
     /**
      * 查询所有商品表。
      *
      * @return 所有数据
      */
     @Override
-    @GetMapping("list")
+    @GetMapping("/list")
     public Result<List<ProductRes>> list() {
         return Result.success(JsonUtils.parseArray(productService.list().toString(), ProductRes.class));
+    }
+
+    @Override
+    @PostMapping("/reduceProductByCreateOrder")
+    public Result<ProductRes> reduceProductByCreateOrder(@RequestParam("id") long id,
+                                                         @RequestParam("quantity") int quantity) throws DataException {
+
+        System.out.println("ProductController RootContext.getXID() : "+RootContext.getXID());
+
+        Product product = productService.getById(id);
+        assert product != null;
+
+        product.setStock(product.getStock() - quantity);
+
+        productService.reduct(product);
+
+        if(quantity>5){
+            throw new DataException("0000");
+        }
+
+        ProductRes productRes = JsonUtils.convertValue(product, ProductRes.class);
+        System.out.println(productRes);
+
+        return Result.success(productRes);
+
     }
 
     /**
@@ -77,7 +97,7 @@ public class ProductController implements ServiceProductFeignClient {
      * @return 商品表详情
      */
     @Override
-    @GetMapping("getInfo/{id}")
+    @GetMapping("/getInfo/{id}")
     public Result<ProductRes> getInfo(@PathVariable Long id) {
 
         return Result.success(JsonUtils.parseObject(Objects.requireNonNull(productService.getById(id)).toString(), ProductRes.class));

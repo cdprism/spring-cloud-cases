@@ -11,4 +11,6 @@ import org.shancm.serviceconsumercore.entity.Order;
  */
 public interface OrderService extends IService<Order> {
 
+    void create(int quantity);
+
 }

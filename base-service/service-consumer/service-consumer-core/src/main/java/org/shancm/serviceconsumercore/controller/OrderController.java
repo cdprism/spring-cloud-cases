@@ -1,10 +1,11 @@
 package org.shancm.serviceconsumercore.controller;
 
 import com.mybatisflex.core.paginate.Page;
+import org.shancm.common.domain.Result;
 import org.shancm.serviceconsumercore.entity.Order;
+import org.shancm.serviceconsumercore.service.BusinessService;
 import org.shancm.serviceconsumercore.service.OrderService;
 import org.shancm.serviceproviderinterface.domain.req.ProductReq;
-import org.shancm.serviceproviderinterface.feign.ServiceProductFeignClient;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,24 +21,33 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
+    private final BusinessService businessService;
 
-    private final ServiceProductFeignClient serviceProductFeignClient;
 
-    public OrderController(OrderService orderService,
-                           ServiceProductFeignClient serviceProductFeignClient) {
+    public OrderController(OrderService orderService,BusinessService businessService) {
         this.orderService = orderService;
-        this.serviceProductFeignClient = serviceProductFeignClient;
+        this.businessService = businessService;
     }
 
     @GetMapping("/show")
     public String show(){
 
-//        return serviceProductFeignClient.list().getData().toString();
+//        return productFeignClient.list().getData().toString();
 
         ProductReq req = new ProductReq();
         req.setProductName("测试");
         req.setStock(999);
-        return serviceProductFeignClient.postTest(req);
+//        return productFeignClient.postTest(req);
+        return "";
+
+    }
+
+    @PostMapping("/takeOrder")
+    public Result<?> takeOrder(@RequestBody int quantity)  {
+
+        businessService.order(quantity);
+
+        return Result.success();
     }
 
     /**

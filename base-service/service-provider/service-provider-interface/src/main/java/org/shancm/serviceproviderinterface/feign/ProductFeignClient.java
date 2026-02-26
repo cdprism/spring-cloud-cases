@@ -1,10 +1,10 @@
 package org.shancm.serviceproviderinterface.feign;
 
-import com.mybatisflex.core.paginate.Page;
 import org.shancm.common.domain.Result;
+import org.shancm.common.exception.DataException;
 import org.shancm.serviceproviderinterface.domain.req.ProductReq;
 import org.shancm.serviceproviderinterface.domain.res.ProductRes;
-import org.shancm.serviceproviderinterface.feign.callback.ServiceProductFeignClientCallBack;
+import org.shancm.serviceproviderinterface.feign.callback.ProductFeignClientCallBack;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,8 +13,8 @@ import java.util.List;
 /**
  * @author shancm
  */
-@FeignClient(value = "service-provider", path = "/product", fallback= ServiceProductFeignClientCallBack.class)
-public interface ServiceProductFeignClient {
+@FeignClient(value = "service-provider", path = "/product", fallback= ProductFeignClientCallBack.class)
+public interface ProductFeignClient {
 
     @PostMapping("/post-test")
     String postTest(@RequestBody ProductReq productReq);
@@ -27,8 +27,11 @@ public interface ServiceProductFeignClient {
      *
      * @return 所有数据
      */
-    @GetMapping("list")
+    @GetMapping("/list")
     Result<List<ProductRes>> list();
+
+    @PostMapping("/reduceProductByCreateOrder")
+    Result<ProductRes> reduceProductByCreateOrder(@RequestParam("id") long id, @RequestParam("quantity") int quantity) throws DataException;
 
     /**
      * 根据主键获取商品表。
@@ -36,6 +39,6 @@ public interface ServiceProductFeignClient {
      * @param id 商品表主键
      * @return 商品表详情
      */
-    @GetMapping("getInfo/{id}")
+    @GetMapping("/getInfo/{id}")
     Result<ProductRes> getInfo(@PathVariable Long id);
 }

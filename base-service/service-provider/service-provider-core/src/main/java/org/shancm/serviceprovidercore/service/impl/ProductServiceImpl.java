@@ -5,6 +5,7 @@ import org.shancm.serviceprovidercore.entity.Product;
 import org.shancm.serviceprovidercore.mapper.ProductMapper;
 import org.shancm.serviceprovidercore.service.ProductService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 商品表 服务层实现。
@@ -15,4 +16,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product>  implements ProductService{
 
+    final
+    ProductMapper productMapper;
+
+    public ProductServiceImpl(ProductMapper productMapper) {
+        this.productMapper = productMapper;
+    }
+
+    @Transactional
+    @Override
+    public void reduct(Product product) {
+        productMapper.update(product);
+    }
 }

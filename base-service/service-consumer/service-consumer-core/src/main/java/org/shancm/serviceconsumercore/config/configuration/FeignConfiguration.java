@@ -24,16 +24,16 @@ public class FeignConfiguration {
         - `HEADERS`: 记录基本信息以及请求和响应的头信息。
         - `FULL`: 记录请求和响应的所有信息，包括头、体、元数据等。*/
 //        return Logger.Level.FULL;
-        return Logger.Level.BASIC;
+        return Logger.Level.FULL;
     }
 
-    @Bean
+    /*@Bean
     Retryer retryer() {
-        /*
+
           重试间隔 100ms
           最大重试间隔 1s。新一次重试间隔是上一次重试间隔的 1.5 倍，但不能超过最大重试间隔。
           最多重试 5 次
-         */
+
         return new Retryer.Default(100, SECONDS.toMillis(1), 5);
-    }
+    }*/
 }

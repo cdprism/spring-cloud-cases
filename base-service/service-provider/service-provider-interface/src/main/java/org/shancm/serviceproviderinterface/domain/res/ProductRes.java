@@ -28,7 +28,6 @@ public class ProductRes implements Serializable {
     /**
      * 雪花ID主键
      */
-    @Id
     private Long id;
 
     /**

@@ -11,7 +11,7 @@ import java.util.StringJoiner;
 
 /**
  * @author by shancm
- * @description TODO
+ * @description DatasourceConfiguration
  * @since 2026-02-19 18:05
  */
 @Configuration

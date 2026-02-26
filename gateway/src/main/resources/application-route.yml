@@ -40,6 +40,7 @@ spring:
 #          default-filters:
 #            - AddRequestHeader=X-Request-Foo, Bar
 
+          #跨域配置
           globalcors:
             cors-configurations:
               '[/**]':

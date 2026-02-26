@@ -3,6 +3,7 @@ package org.shancm.serviceprovidercore.advice;
 import org.shancm.common.domain.Result;
 import org.shancm.common.domain.enums.ResultCode;
 import org.shancm.common.exception.BusinessException;
+import org.shancm.common.exception.DataException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.xml.crypto.Data;
 import java.util.stream.Collectors;
 
 /**
@@ -33,6 +35,11 @@ public class GlobalExceptionHandler {
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.joining("; "));
         return Result.failed(ResultCode.VALIDATE_FAILED, msg);
+    }
+    @ExceptionHandler(DataException.class)
+    public Result<Void> handleDataException(Exception e) throws DataException {
+        log.error("数据异常", e);
+        throw new DataException(e.getMessage());
     }
 
     @ExceptionHandler(Exception.class)

@@ -1,22 +1,21 @@
 package org.shancm.serviceproviderinterface.feign.callback;
 
-import com.mybatisflex.core.paginate.Page;
 import org.shancm.common.domain.Result;
 import org.shancm.serviceproviderinterface.domain.req.ProductReq;
 import org.shancm.serviceproviderinterface.domain.res.ProductRes;
-import org.shancm.serviceproviderinterface.feign.ServiceProductFeignClient;
+import org.shancm.serviceproviderinterface.feign.ProductFeignClient;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 /**
  * @author by shancm
- * @description ServiceProductFeignClientCallBack
+ * @description ProductFeignClientCallBack
  * @since 2026-02-22 18:39
  */
 
 @Component
-public class ServiceProductFeignClientCallBack implements ServiceProductFeignClient {
+public class ProductFeignClientCallBack implements ProductFeignClient {
     @Override
     public String postTest(ProductReq productReq) {
         return "empty";
@@ -29,6 +28,11 @@ public class ServiceProductFeignClientCallBack implements ServiceProductFeignCli
 
     @Override
     public Result<List<ProductRes>> list() {
+        return Result.failed();
+    }
+
+    @Override
+    public Result<ProductRes> reduceProductByCreateOrder(long id, int quantity) {
         return Result.failed();
     }
 

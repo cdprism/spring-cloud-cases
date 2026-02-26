@@ -26,13 +26,13 @@ public class FeignConfiguration {
         return Logger.Level.FULL;
     }
 
-    @Bean
+    /*@Bean
     Retryer retryer() {
-        /*
+
           重试间隔 100ms
           最大重试间隔 1s。新一次重试间隔是上一次重试间隔的 1.5 倍，但不能超过最大重试间隔。
           最多重试 5 次
-         */
+
         return new Retryer.Default(100, SECONDS.toMillis(1), 5);
-    }
+    }*/
 }

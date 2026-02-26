@@ -231,8 +231,75 @@ spring:
 - 自定义过滤器 实现`GatewayFilter`
 
 ### 全局跨域
-
-
+```yml
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                #请求来源地址
+                allowed-origin-patterns: '*'
+                allowed-headers: '*'
+                allowedMethods: '*'
+```
+## seata
+- TC：Transaction Coordinator，即事务协调者。维护全局和分支事务的状态，驱动全局事务提交或回滚；
+- TM：Transaction Manager，即事务管理器。定义全局事务的范围，开始全局事务、提交或回滚全局事务；
+- RM：Resource Manager，即资源管理器。管理分支事务处理的资源，与 TC 交谈以注册分支事务和报告分支事务的状态，并驱动分支事务提交或回滚
+1. 把`postgresql`的jar包放在`lib`文件夹下
+2. seata-server配置 `conf/application.yaml`
+```yml
+seata:
+  config:
+    type: nacos
+    nacos:
+      server-addr: 127.0.0.1:8848
+      group: SEATA_GROUP
+      namespace:
+      username: nacos
+      password: nacos
+  registry:
+    type: nacos
+    nacos:
+      application: seata-server
+      server-addr: 127.0.0.1:8848
+      group: SEATA_GROUP
+      namespace:
+      cluster: default
+      username: nacos
+      password: nacos
+  store:
+    mode: db # 使用数据库模式存储事务日志，生产环境推荐
+    db:
+      datasource: druid
+      db-type: postgresql
+      driver-class-name: org.postgresql.Driver
+      url: jdbc:postgresql://localhost:5432/seata_server?currentSchema=public&stringtype=unspecified
+      user: postgres
+      password: mysql
+```
+2. 业务服务配置 `application.yaml`
+```yml
+seata:
+  registry:
+    type: nacos
+    nacos:
+      application: seata-server
+      server-addr: 127.0.0.1:8848
+      group : "SEATA_GROUP"
+      namespace: ""
+      username: nacos
+      password: nacos
+      context-path: ""
+      ##if use MSE Nacos with auth, mutex with username/password attribute
+      #access-key: ""
+      #secret-key: ""
+  tx-service-group: default_tx_group
+  service:
+    vgroup-mapping:
+      default_tx_group: default
+```
+3. 创建库 `seata-server\script\server\db`
+工程注解`@EnableTransactionManagement`
+方法注解`@GlobalTransactional`
 
 
 

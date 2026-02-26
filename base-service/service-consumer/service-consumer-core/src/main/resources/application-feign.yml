@@ -15,3 +15,7 @@ spring:
             connect-timeout: 3000
             # 读取超时，5000 毫秒
             read-timeout: 5000
+
+logging:
+  level:
+    org.shancm.serviceproviderinterface.feign: debug

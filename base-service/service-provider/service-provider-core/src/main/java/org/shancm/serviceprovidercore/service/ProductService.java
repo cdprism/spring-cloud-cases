@@ -11,4 +11,6 @@ import org.shancm.serviceprovidercore.entity.Product;
  */
 public interface ProductService extends IService<Product> {
 
+    void reduct(Product product);
+
 }
